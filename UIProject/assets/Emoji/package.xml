@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="y768eypa" jpegQuality="80" compressPNG="true">
+  <resources>
+    <component id="fvaib" name="Main.xml" path="/" exported="true"/>
+    <image id="fymi17" name="3.png" path="/images/" scale="9grid" scale9grid="10,15,28,32"/>
+    <image id="fymi18" name="9.png" path="/images/" scale="9grid" scale9grid="12,10,24,20"/>
+    <component id="fymi19" name="Button2.xml" path="/"/>
+    <image id="fymi1a" name="8.png" path="/images/"/>
+    <component id="fymi1b" name="Button.xml" path="/"/>
+    <image id="fymi1c" name="0.png" path="/images/" scale="9grid" scale9grid="40,17,80,34"/>
+    <image id="fymi1d" name="1.png" path="/images/" scale="9grid" scale9grid="40,17,80,34"/>
+    <component id="kfcb1e" name="ScrollBar_VT.xml" path="/" exported="true"/>
+    <image id="kfcb1f" name="5.png" path="/images/" scale="9grid" scale9grid="3,9,2,360"/>
+    <image id="kfcb1g" name="4.png" path="/images/" scale="9grid" scale9grid="2,6,4,193"/>
+    <component id="kfcb1h" name="chatLeft.xml" path="/" exported="true"/>
+    <image id="kfcb1i" name="6.png" path="/images/" scale="9grid" scale9grid="27,21,334,18"/>
+    <component id="kfcb1j" name="chatRight.xml" path="/" exported="true"/>
+    <image id="kfcb1k" name="7.png" path="/images/" scale="9grid" scale9grid="19,23,229,37"/>
+    <image id="l7d51l" name="r1.png" path="/images/" exported="true"/>
+    <image id="l7d51m" name="r0.png" path="/images/" exported="true"/>
+    <component id="iy2u1n" name="faceSub.xml" path="/"/>
+    <image id="iy2u1o" name="2.png" path="/images/" scale="9grid" scale9grid="17,16,74,73"/>
+    <movieclip id="iy2u1q" name="88.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1r" name="am.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1s" name="bs.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1t" name="bz.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1u" name="ch.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1v" name="cool.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1w" name="dhq.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1x" name="dn.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1y" name="fd.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u1z" name="gz.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u20" name="han.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u21" name="hx.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u22" name="hxiao.jta" path="/emoji/" exported="true"/>
+    <movieclip id="iy2u23" name="hxiu.jta" path="/emoji/" exported="true"/>
+    <component id="iy2u24" name="EmojiSelectUI.xml" path="/" exported="true"/>
+  </resources>
+  <publish name="Emoji">
+    <atlas name="默认" index="0"/>
+  </publish>
+</packageDescription>

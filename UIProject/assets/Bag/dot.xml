@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="15,15" extention="Button">
+  <controller name="button" pages="0,up,1,down" selected="0"/>
+  <displayList>
+    <image id="n23_osdo" name="n23" src="fytjl" xy="0,0">
+      <gearDisplay controller="button" pages="0"/>
+    </image>
+    <image id="n25_vces" name="n25" src="vcesn" xy="0,0">
+      <gearDisplay controller="button" pages="1"/>
+    </image>
+  </displayList>
+  <Button mode="Radio"/>
+</component>
