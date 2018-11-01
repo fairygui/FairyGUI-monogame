@@ -2,7 +2,7 @@
 	"binaryFormat":true,
 	"codeGeneration":{
 		"classNamePrefix":"",
-		"codePath":"../Classes",
+		"codePath":"",
 		"codeType":"",
 		"getMemberByName":false,
 		"ignoreNoname":true,
