@@ -159,7 +159,7 @@ namespace FairyGUI
 			onRemovedFromStage = new EventListener(this, "onRemovedFromStage");
 			onKeyDown = new EventListener(this, "onKeyDown");
 			onClickLink = new EventListener(this, "onClickLink");
-		}
+        }
 
 		/// <summary>
 		/// 

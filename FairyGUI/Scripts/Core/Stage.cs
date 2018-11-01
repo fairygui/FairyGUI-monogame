@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FairyGUI.Scripts.Core.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
@@ -31,6 +32,7 @@ namespace FairyGUI
 		bool _soundEnabled;
 		Dictionary<Keys, float> _lastKeyDownTime;
 		Keys[] _lastKeys;
+	    public static IMEHandler Handler;
 
 		public static EventCallback0 beforeUpdate;
 		public static EventCallback0 afterUpdate;
@@ -68,8 +70,9 @@ namespace FairyGUI
 		{
 			_inst = this;
 			Stage.game = game;
+		    Handler = new IMEHandler(game);
 
-			soundVolume = 1;
+            soundVolume = 1;
 
 			_batch = new FairyBatch();
 			_soundEnabled = true;
@@ -84,7 +87,7 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// 
 		/// </summary>
 		public void Initialize()
