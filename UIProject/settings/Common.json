@@ -2,6 +2,7 @@
 	"buttonClickSound":"",
 	"colorScheme":["Custom color #FF0000"],
 	"font":"_sans",
+	"fontScheme":["Default font"],
 	"fontSize":12,
 	"fontSizeScheme":["Custom font size 30"],
 	"scrollBars":{

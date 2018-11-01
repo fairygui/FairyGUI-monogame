@@ -46,8 +46,6 @@
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenes\DemoScene.cs" />
-    <Compile Include="Scenes\MenuScene.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.7.0.1708, Culture=neutral, processorArchitecture=MSIL">
