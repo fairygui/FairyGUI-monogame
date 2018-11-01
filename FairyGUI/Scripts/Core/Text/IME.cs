@@ -5,16 +5,19 @@ namespace FairyGUI.Scripts.Core.Text
 {
     public class IMEHandler : IDisposable
     {
-        private IMENativeWindow _nativeWnd;
+        public IMENativeWindow _nativeWnd;
 
-        public IMEHandler(Game game, bool showDefaultIMEWindow = false)
+        public IMEHandler(Game game, bool showDefaultImeWindow = false)
         {
             this.GameInstance = game;
             Input = new InputRemapper(game);
-            _nativeWnd = new IMENativeWindow(game.Window.Handle, showDefaultIMEWindow);
-            _nativeWnd.onCandidatesReceived += (s, e) => { if (onCandidatesReceived != null) onCandidatesReceived(s, e); };
-            _nativeWnd.onCompositionReceived += (s, e) => { if (onCompositionReceived != null) onCompositionReceived(s, e); };
-            _nativeWnd.onResultReceived += (s, e) => { if (onResultReceived != null) onResultReceived(s, e); };
+            _nativeWnd = new IMENativeWindow(game.Window.Handle, showDefaultImeWindow);
+            _nativeWnd.onCandidatesReceived += (s, e) => { onCandidatesReceived?.Invoke(s, e); };
+            _nativeWnd.onCompositionReceived += (s, e) => { onCompositionReceived?.Invoke(s, e); };
+            _nativeWnd.onResultReceived += (s, e) => { onResultReceived?.Invoke(s, e); };
+            _nativeWnd.onStartCompositionReceived += (s, e) => { onStartCompositionReceived?.Invoke(s, e); };
+            _nativeWnd.onEndCompositionReceived += (s, e) => { onEndCompositionReceived?.Invoke(s, e); };
+            _nativeWnd.onKeyDownReceived += (sender, args) => { onKeyDownReceived?.Invoke(sender, args); };
             game.Exiting += (o, e) => this.Dispose();
         }
 
@@ -28,6 +31,10 @@ namespace FairyGUI.Scripts.Core.Text
         /// </summary>
         public event EventHandler onCandidatesReceived;
 
+        public event EventHandler onStartCompositionReceived;
+
+        public event EventHandler<IMEResultEventArgs> onEndCompositionReceived;
+
         /// <summary>
         /// Called when the composition updated
         /// </summary>
@@ -37,6 +44,8 @@ namespace FairyGUI.Scripts.Core.Text
         /// Called when a new result character is coming
         /// </summary>
         public event EventHandler<IMEResultEventArgs> onResultReceived;
+        
+        public event EventHandler<IMEResultEventArgs> onKeyDownReceived;
 
         /// <summary>
         /// Array of the candidates
@@ -144,6 +153,11 @@ namespace FairyGUI.Scripts.Core.Text
         public CompositionAttributes GetCompositionReadAttr(int index)
         {
             return _nativeWnd.GetCompositionReadAttr(index);
+        }
+
+        public void OpenIme()
+        {
+            _nativeWnd.OpenIME();
         }
 
         /// <summary>

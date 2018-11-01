@@ -35,7 +35,7 @@ namespace FairyGUI.Scripts.Core.Text
             ImeControl = 0x0283,
             ImeCompositionFull = 0x0284,
             ImeSelect = 0x0285,
-            ImeChar = 0x286,
+            ImeChar = 0x0286,
             ImeRequest = 0x0288,
             ImeKeyDown = 0x0290,
             ImeKeyUp = 0x0291;
@@ -71,8 +71,30 @@ namespace FairyGUI.Scripts.Core.Text
         [DllImport("imm32.dll", SetLastError = true)]
         public static extern IntPtr ImmGetContext(IntPtr hWnd);
 
+        [DllImport("imm32.dll", EntryPoint = "ImmGetConversionStatus")]
+        public static extern bool ImmGetConversionStatus(IntPtr himc, ref IntPtr lpdw, ref IntPtr lpdw2);
+
+        [DllImport("Imm32.dll")]
+        public static extern bool ImmReleaseContext(IntPtr hWnd, IntPtr hIMC);
+
+        [DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
+        public static extern int ImmGetCompositionStringW(IntPtr hIMC, int dwIndex, byte[] lpBuf, int dwBufLen);
+
+        [DllImport("imm32.dll")]
+        public static extern bool ImmSetOpenStatus(IntPtr himc, bool b);
+
+        [DllImport("imm32.dll")]
+        public static extern bool ImmGetOpenStatus(IntPtr himc);
+
+        [DllImport("imm32.dll", EntryPoint = "ImmSetConversionStatus")]
+        public static extern bool ImmSetConversionStatus(IntPtr himc,IntPtr dw1,IntPtr dw2);
+
         [DllImport("user32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Auto)]
         public static extern bool TranslateMessage(IntPtr message);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetActiveWindow();
+
 
         [StructLayout(LayoutKind.Sequential)]
         public struct CandidateList

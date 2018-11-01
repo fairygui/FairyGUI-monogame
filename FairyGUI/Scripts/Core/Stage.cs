@@ -71,7 +71,6 @@ namespace FairyGUI
 			_inst = this;
 			Stage.game = game;
 		    Handler = new IMEHandler(game);
-		    Handler.onResultReceived += HandlerOnOnResultReceived;
 
             soundVolume = 1;
 
@@ -87,24 +86,6 @@ namespace FairyGUI
 
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
-
-	    private void HandlerOnOnResultReceived(object sender, IMEResultEventArgs e)
-	    {
-	        switch ((int)e.result)
-	        {
-	            case 8:
-	                if (IMEAdapter.content.Length > 0)
-	                    IMEAdapter.content = IMEAdapter.content.Remove(IMEAdapter.content.Length - 1, 1);
-	                break;
-	            case 27:
-	            case 13:
-	                IMEAdapter.content = "";
-	                break;
-	            default:
-	                IMEAdapter.content += e.result;
-	                break;
-	        }
-        }
 
 	    /// <summary>
 		/// 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
+using FairyGUI.Utils;
 
 namespace FairyGUI.Scripts.Core.Text
 {
@@ -171,9 +173,21 @@ namespace FairyGUI.Scripts.Core.Text
         public event EventHandler onCompositionReceived;
 
         /// <summary>
+        /// Called when the composition begin
+        /// </summary>
+        public event EventHandler onStartCompositionReceived;
+
+        /// <summary>
+        /// Called when the composition end
+        /// </summary>
+        public event EventHandler<IMEResultEventArgs> onEndCompositionReceived;
+
+        /// <summary>
         /// Called when a new result character is coming
         /// </summary>
         public event EventHandler<IMEResultEventArgs> onResultReceived;
+
+        public event EventHandler<IMEResultEventArgs> onKeyDownReceived;
 
         /// <summary>
         /// Constructor, must be called when the window create.
@@ -219,6 +233,17 @@ namespace FairyGUI.Scripts.Core.Text
         }
 
         /// <summary>
+        /// Get IME Chinese/English Status
+        /// </summary>
+        /// <returns></returns>
+        public bool getStatus()
+        {
+            IntPtr dw1 = IntPtr.Zero;
+            IntPtr dw2 = IntPtr.Zero;
+            return IMM.ImmGetConversionStatus(Handle, ref dw1, ref dw2);
+        }
+
+        /// <summary>
         /// Dispose everything
         /// </summary>
         public void Dispose()
@@ -241,6 +266,10 @@ namespace FairyGUI.Scripts.Core.Text
                 case IMM.ImeComposition: IMEComposition(msg.LParam.ToInt32()); break;
                 case IMM.ImeEndComposition: IMEEndComposition(msg.LParam.ToInt32()); break;
                 case IMM.Char: CharEvent(msg.WParam.ToInt32()); break;
+                case IMM.ImnSetConversionMode: break;
+                case IMM.ImeRequest: break;
+                case IMM.KeyDown: KeyDownEvent(msg.WParam.ToInt32());
+                    break;
             }
             base.WndProc(ref msg);
         }
@@ -334,16 +363,14 @@ namespace FairyGUI.Scripts.Core.Text
         {
             CandidatesSelection = CandidatesPageStart = CandidatesPageSize = 0;
             Candidates = new string[0];
-            if (onCandidatesReceived != null)
-                onCandidatesReceived(this, EventArgs.Empty);
+            onCandidatesReceived?.Invoke(this, EventArgs.Empty);
         }
 
         private void IMEStartComposion(int lParam)
         {
             ClearComposition();
             ClearResult();
-            if (onCompositionReceived != null)
-                onCompositionReceived(this, EventArgs.Empty);
+            onStartCompositionReceived?.Invoke(this, EventArgs.Empty);
         }
 
         private void IMEComposition(int lParam)
@@ -356,8 +383,7 @@ namespace FairyGUI.Scripts.Core.Text
                 _compreadclause.Update();
                 _compreadattr.Update();
                 _compcurpos.Update();
-                if (onCompositionReceived != null)
-                    onCompositionReceived(this, EventArgs.Empty);
+                onCompositionReceived?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -370,14 +396,77 @@ namespace FairyGUI.Scripts.Core.Text
                 _resread.Update();
                 _resreadclause.Update();
             }
-            if (onCompositionReceived != null)
-                onCompositionReceived(this, EventArgs.Empty);
+
+            onEndCompositionReceived?.Invoke(this, new IMEResultEventArgs((char)lParam));
         }
 
         private void CharEvent(int wParam)
         {
-            if (onResultReceived != null)
-                onResultReceived(this, new IMEResultEventArgs((char)wParam));
+            onResultReceived?.Invoke(this, new IMEResultEventArgs((char)wParam));
+        }
+
+        private void KeyDownEvent(int wParam)
+        {
+            onKeyDownReceived?.Invoke(this, new IMEResultEventArgs((char)wParam));
+        }
+
+        private bool ImeGetOpenStatus(IntPtr lParam)
+        {
+            return IMM.ImmGetOpenStatus(lParam);
+        }
+
+        private const int GCS_COMPSTR = 8;
+
+        /// IntPtr handle is the handle to the textbox
+        public string CurrentCompStr(IntPtr handle)
+        {
+            int readType = GCS_COMPSTR;
+
+            IntPtr hIMC = IMM.ImmGetContext(handle);
+            try
+            {
+                int strLen = IMM.ImmGetCompositionStringW(hIMC, readType, null, 0);
+
+                if (strLen > 0)
+                {
+                    byte[] buffer = new byte[strLen];
+
+                    IMM.ImmGetCompositionStringW(hIMC, readType, buffer, strLen);
+
+                    return Encoding.Unicode.GetString(buffer);
+
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+            finally
+            {
+                IMM.ImmReleaseContext(handle, hIMC);
+            }
+        }
+
+        public const int IME_CMODE_SOFTKBD = 0x80;
+
+        public void OpenIME()
+        {
+            IntPtr hwndInput = IMM.ImmGetContext(IMM.GetActiveWindow());
+            IMM.ImmSetOpenStatus(hwndInput, true);
+            IntPtr dw1 = IntPtr.Zero;
+            IntPtr dw2 = IntPtr.Zero;
+            bool isSuccess = IMM.ImmGetConversionStatus(hwndInput, ref dw1, ref dw2);
+            Log.Info("" + hwndInput + "," + isSuccess);
+            if (isSuccess)
+            {
+                int intTemp = dw1.ToInt32() & IME_CMODE_SOFTKBD;
+                if (intTemp > 0)
+                    dw1 = (IntPtr)(dw1.ToInt32() ^ IME_CMODE_SOFTKBD);
+                else
+                    dw1 = (IntPtr)(dw1.ToInt32() | IME_CMODE_SOFTKBD);
+            }
+            isSuccess = IMM.ImmSetConversionStatus(hwndInput, dw1, dw2);
+            IMM.ImmReleaseContext(IMM.GetActiveWindow(), hwndInput);
         }
         #endregion
     }
