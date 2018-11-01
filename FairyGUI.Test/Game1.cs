@@ -1,4 +1,5 @@
 ﻿using FairyGUI;
+using FairyGUI.Test.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -53,12 +54,10 @@ namespace FairyGUI.Test
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			UIPackage.AddPackage("UI/Basics");
-			GComponent view = UIPackage.CreateObject("Basics", "Main").asCom;
-			view.AddRelation(GRoot.inst, RelationType.Size);
-			GRoot.inst.AddChild(view);
-			// TODO: use this.Content to load your game content here
-		}
+		    UIConfig.defaultFont = "Microsoft YaHei";
+		    GRoot.inst.AddChild(new MenuScene());
+            // TODO: use this.Content to load your game content here
+        }
 
 		/// <summary>
 		/// UnloadContent will be called once per game and is the place to unload

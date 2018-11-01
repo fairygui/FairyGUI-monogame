@@ -92,6 +92,7 @@
     <Compile Include="Scripts\UI\Action\ControllerAction.cs" />
     <Compile Include="Scripts\UI\Action\PlayTransitionAction.cs" />
     <Compile Include="Scripts\UI\Controller.cs" />
+    <Compile Include="Scripts\UI\DragDropManager.cs" />
     <Compile Include="Scripts\UI\FieldTypes.cs" />
     <Compile Include="Scripts\UI\GButton.cs" />
     <Compile Include="Scripts\UI\GComboBox.cs" />
@@ -127,12 +128,15 @@
     <Compile Include="Scripts\UI\Margin.cs" />
     <Compile Include="Scripts\UI\PackageItem.cs" />
     <Compile Include="Scripts\UI\PageOption.cs" />
+    <Compile Include="Scripts\UI\PopupMenu.cs" />
     <Compile Include="Scripts\UI\RelationItem.cs" />
     <Compile Include="Scripts\UI\Relations.cs" />
     <Compile Include="Scripts\UI\RichTextField.cs" />
     <Compile Include="Scripts\UI\ScrollPane.cs" />
     <Compile Include="Scripts\UI\Transition.cs" />
     <Compile Include="Scripts\UI\TranslationHelper.cs" />
+    <Compile Include="Scripts\UI\Tree\TreeNode.cs" />
+    <Compile Include="Scripts\UI\Tree\TreeView.cs" />
     <Compile Include="Scripts\UI\UIConfig.cs" />
     <Compile Include="Scripts\UI\UIContentScaler.cs" />
     <Compile Include="Scripts\UI\UIObjectFactory.cs" />
