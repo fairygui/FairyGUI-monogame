@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using FairyGUI.Scripts.Core.Text;
 using Rectangle = System.Drawing.RectangleF;
 
 namespace FairyGUI
@@ -93,7 +94,8 @@ namespace FairyGUI
 			onTouchMove.AddCapture(__touchMove);
 		}
 
-		/// <summary>
+
+	    /// <summary>
 		/// 
 		/// </summary>
 		public override string text
@@ -771,7 +773,7 @@ namespace FairyGUI
 
 			_editing = false;
 
-			IMEAdapter.compositionMode = IMEAdapter.CompositionMode.Auto;
+			IMEAdapter.compositionMode = IMEAdapter.CompositionMode.Off;
 
 			if (!string.IsNullOrEmpty(_promptText))
 				UpdateText();
