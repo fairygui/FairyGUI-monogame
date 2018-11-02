@@ -1,15 +1,10 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
-using FairyGUI.Scripts.Core.Text;
-using FairyGUI.Utils;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace FairyGUI
 {
 	public static class IMEAdapter
 	{
-	    public enum CompositionMode
+		public enum CompositionMode
 		{
 			//Auto = 0, // 没有Auto属性
 			On = 1,
@@ -35,10 +30,10 @@ namespace FairyGUI
 		        _compositionMode = value;
 
 		    }
-		    get { return _compositionMode; }
+		    get => _compositionMode;
 		}
 
-		public static string compositionString
+		public static string CompositionString
 		{
 			get { return string.Empty; }
 		}
