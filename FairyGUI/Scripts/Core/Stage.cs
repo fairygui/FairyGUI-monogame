@@ -32,7 +32,8 @@ namespace FairyGUI
 		bool _soundEnabled;
 		Dictionary<Keys, float> _lastKeyDownTime;
 		Keys[] _lastKeys;
-	    public static IMEHandler Handler;
+		int _lastScrollWheelValue;
+		public static IMEHandler Handler;
 
 		public static EventCallback0 beforeUpdate;
 		public static EventCallback0 afterUpdate;
@@ -70,9 +71,9 @@ namespace FairyGUI
 		{
 			_inst = this;
 			Stage.game = game;
-		    Handler = new IMEHandler(game);
+			Handler = new IMEHandler(game);
 
-            soundVolume = 1;
+			soundVolume = 1;
 
 			_batch = new FairyBatch();
 			_soundEnabled = true;
@@ -87,7 +88,7 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-	    /// <summary>
+		/// <summary>
 		/// 
 		/// </summary>
 		public void Initialize()
@@ -269,17 +270,6 @@ namespace FairyGUI
 		internal void HandleMouseEvents()
 		{
 			MouseState mouseState = Mouse.GetState();
-			if (mouseState.ScrollWheelValue != 0)
-			{
-				if (_touchTarget != null)
-				{
-					_touchInfo.mouseWheelDelta = -mouseState.ScrollWheelValue;
-					_touchInfo.UpdateEvent();
-					_touchTarget.onMouseWheel.BubbleCall(_touchInfo.evt);
-					_touchInfo.mouseWheelDelta = 0;
-				}
-				return;
-			}
 
 			_touchPosition = new Vector2(mouseState.Position.X, mouseState.Position.Y);
 			_touchTarget = HitTest(_touchPosition, true);
@@ -333,6 +323,20 @@ namespace FairyGUI
 
 					_touchInfo.button = -1;
 				}
+			}
+
+			int deltaWheel = mouseState.ScrollWheelValue - _lastScrollWheelValue;
+			if (deltaWheel != 0)
+			{
+				if (_touchTarget != null)
+				{
+					_touchInfo.mouseWheelDelta = -deltaWheel;
+					_touchInfo.UpdateEvent();
+					_touchTarget.onMouseWheel.BubbleCall(_touchInfo.evt);
+					_touchInfo.mouseWheelDelta = 0;
+				}
+
+				_lastScrollWheelValue = mouseState.ScrollWheelValue;
 			}
 		}
 
