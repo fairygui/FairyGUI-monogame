@@ -72,9 +72,9 @@ namespace FairyGUI
 		const int GUTTER_X = 2;
 		const int GUTTER_Y = 2;
 
-	    private bool _compositionReceived = false;
+		public bool CanInsert = true;
 
-        public InputTextField()
+		public InputTextField()
 		{
 			onFocusIn = new EventListener(this, "onFocusIn");
 			onFocusOut = new EventListener(this, "onFocusOut");
@@ -91,55 +91,18 @@ namespace FairyGUI
 			 */
 			this.hitArea = new RectHitTest();
 			this.touchChildren = false;
-            
-		    Stage.Handler.onCompositionReceived += (sender, args) => { _compositionReceived = true; };
-		    Stage.Handler.onResultReceived += HandlerOnResultReceived;
 
-            onFocusIn.Add(__focusIn);
+			onFocusIn.Add(__focusIn);
 			onFocusOut.AddCapture(__focusOut);
 			onKeyDown.AddCapture(__keydown);
 			onTouchBegin.AddCapture(__touchBegin);
 			onTouchMove.AddCapture(__touchMove);
 		}
-        
-	    private void HandlerOnResultReceived(object sender, IMEResultEventArgs e)
-	    {
-	        switch ((int)e.result)
-	        {
-	            case 8:
-	                break;
-	            case 27:
-	            case 13:
-	                break;
-	            default:
-	                if (_compositionReceived)
-	                {
-	                    if (!CheckStringChineseReg(e.result.ToString()))
-	                    {
-	                        _compositionReceived = false;
-	                        break;
-	                    }
-
-
-	                    ReplaceSelection(e.result.ToString());
-                    }
-
-	                break;
-	        }
-	    }
-
-	    private bool CheckStringChineseReg(string t)
-	    {
-	        bool res = Regex.IsMatch(t, @"[\u4e00-\u9fbb]+$");
-
-	        return res;
-	    }
-
-
-	    /// <summary>
-        /// 
-        /// </summary>
-        public override string text
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		public override string text
 		{
 			get
 			{
@@ -384,14 +347,14 @@ namespace FairyGUI
 				textField.htmlText = _decodedPromptText;
 			else if (_displayAsPassword)
 				textField.text = EncodePasswordText(_text);
-			else if (IMEAdapter.compositionString.Length > 0)
+			else if (IMEAdapter.CompositionString.Length > 0)
 			{
 				StringBuilder buffer = new StringBuilder();
 				buffer.Append(_text, 0, _caretPosition);
-				buffer.Append(IMEAdapter.compositionString);
+				buffer.Append(IMEAdapter.CompositionString);
 				buffer.Append(_text, _caretPosition + composing, _text.Length - _caretPosition - composing);
 
-				_composing = IMEAdapter.compositionString.Length;
+				_composing = IMEAdapter.CompositionString.Length;
 
 				string newText = buffer.ToString();
 				textField.text = newText;
@@ -455,7 +418,7 @@ namespace FairyGUI
 		{
 			TextField.CharPosition cp;
 			if (_editing)
-				cp = GetCharPosition(_caretPosition + IMEAdapter.compositionString.Length);
+				cp = GetCharPosition(_caretPosition + IMEAdapter.CompositionString.Length);
 			else
 				cp = GetCharPosition(_caretPosition);
 
@@ -543,7 +506,7 @@ namespace FairyGUI
 			}
 
 			TextField.CharPosition start;
-			if (_editing && IMEAdapter.compositionString.Length > 0)
+			if (_editing && IMEAdapter.CompositionString.Length > 0)
 			{
 				if (_selectionStart < _caretPosition)
 				{
@@ -551,7 +514,7 @@ namespace FairyGUI
 					start = GetCharPosition(_selectionStart);
 				}
 				else
-					start = GetCharPosition(_selectionStart + IMEAdapter.compositionString.Length);
+					start = GetCharPosition(_selectionStart + IMEAdapter.CompositionString.Length);
 			}
 			else
 				start = GetCharPosition(_selectionStart);
@@ -728,13 +691,13 @@ namespace FairyGUI
 
 		void DoCopy(string value)
 		{
-		    Clipboard.SetDataObject(value);
-        }
+			Clipboard.SetDataObject(value);
+		}
 
 		void DoPaste()
 		{
-		    IDataObject iData = Clipboard.GetDataObject();
-		    if (iData != null) ReplaceSelection((String) iData.GetData(DataFormats.Text));
+			IDataObject iData = Clipboard.GetDataObject();
+			if (iData != null) ReplaceSelection((String)iData.GetData(DataFormats.Text));
 		}
 
 		static void CreateCaret()
@@ -764,7 +727,7 @@ namespace FairyGUI
 			context.CaptureTouch();
 		}
 
-        void __touchMove(EventContext context)
+		void __touchMove(EventContext context)
 		{
 			if (isDisposed)
 				return;
@@ -826,231 +789,231 @@ namespace FairyGUI
 			_selectionShape.RemoveFromParent();
 		}
 
-	    void __keydown(EventContext context)
-	    {
-	        if (!_editing || context.isDefaultPrevented)
-	            return;
-
-	        InputEvent evt = context.inputEvent;
-
-	        switch (evt.keyCode)
-	        {
-	            case Keys.Back:
-	            {
-	                context.PreventDefault();
-	                if (_selectionStart == _caretPosition && _caretPosition > 0)
-	                    _selectionStart = _caretPosition - 1;
-	                ReplaceSelection(null);
-	                break;
-	            }
-
-	            case Keys.Delete:
-	            {
-	                context.PreventDefault();
-	                if (_selectionStart == _caretPosition && _caretPosition < textField.charPositions.Count - 1)
-	                    _selectionStart = _caretPosition + 1;
-	                ReplaceSelection(null);
-	                break;
-	            }
-
-	            case Keys.Left:
-	            {
-	                context.PreventDefault();
-	                if (!evt.shift)
-	                    ClearSelection();
-	                if (_caretPosition > 0)
-	                {
-	                    TextField.CharPosition cp = GetCharPosition(_caretPosition - 1);
-	                    AdjustCaret(cp, !evt.shift);
-	                }
-
-	                break;
-	            }
-
-	            case Keys.Right:
-	            {
-	                context.PreventDefault();
-	                if (!evt.shift)
-	                    ClearSelection();
-	                if (_caretPosition < textField.charPositions.Count - 1)
-	                {
-	                    TextField.CharPosition cp = GetCharPosition(_caretPosition + 1);
-	                    AdjustCaret(cp, !evt.shift);
-	                }
-
-	                break;
-	            }
-
-	            case Keys.Up:
-	            {
-	                context.PreventDefault();
-	                if (!evt.shift)
-	                    ClearSelection();
-
-	                TextField.CharPosition cp = GetCharPosition(_caretPosition);
-	                if (cp.lineIndex == 0)
-	                    return;
-
-	                TextField.LineInfo line = textField.lines[cp.lineIndex - 1];
-	                cp = GetCharPosition(new Vector2(_caret.x, line.y + textField.y));
-	                AdjustCaret(cp, !evt.shift);
-	                break;
-	            }
-
-	            case Keys.Down:
-	            {
-	                context.PreventDefault();
-	                if (!evt.shift)
-	                    ClearSelection();
-
-	                TextField.CharPosition cp = GetCharPosition(_caretPosition);
-	                if (cp.lineIndex == textField.lines.Count - 1)
-	                    cp.charIndex = textField.charPositions.Count - 1;
-	                else
-	                {
-	                    TextField.LineInfo line = textField.lines[cp.lineIndex + 1];
-	                    cp = GetCharPosition(new Vector2(_caret.x, line.y + textField.y));
-	                }
-
-	                AdjustCaret(cp, !evt.shift);
-	                break;
-	            }
-
-	            case Keys.PageUp:
-	            {
-	                context.PreventDefault();
-	                ClearSelection();
-
-	                break;
-	            }
-
-	            case Keys.PageDown:
-	            {
-	                context.PreventDefault();
-	                ClearSelection();
-
-	                break;
-	            }
-
-	            case Keys.Home:
-	            {
-	                context.PreventDefault();
-	                if (!evt.shift)
-	                    ClearSelection();
-
-	                TextField.CharPosition cp = GetCharPosition(_caretPosition);
-	                TextField.LineInfo line = textField.lines[cp.lineIndex];
-	                cp = GetCharPosition(new Vector2(int.MinValue, line.y + textField.y));
-	                AdjustCaret(cp, !evt.shift);
-	                break;
-	            }
-
-	            case Keys.End:
-	            {
-	                context.PreventDefault();
-	                if (!evt.shift)
-	                    ClearSelection();
-
-	                TextField.CharPosition cp = GetCharPosition(_caretPosition);
-	                TextField.LineInfo line = textField.lines[cp.lineIndex];
-	                cp = GetCharPosition(new Vector2(int.MaxValue, line.y + textField.y));
-	                AdjustCaret(cp, !evt.shift);
-
-	                break;
-	            }
-
-	            //Select All
-	            case Keys.A:
-	            {
-	                if (evt.ctrl)
-	                {
-	                    context.PreventDefault();
-	                    _selectionStart = 0;
-	                    AdjustCaret(GetCharPosition(int.MaxValue));
-	                }
-
-	                break;
-	            }
-
-	            //Copy
-	            case Keys.C:
-	            {
-	                if (evt.ctrl && !_displayAsPassword)
-	                {
-	                    context.PreventDefault();
-	                    string s = GetSelection();
-	                    if (!string.IsNullOrEmpty(s))
-	                        DoCopy(s);
-	                }
-
-	                break;
-	            }
-
-	            //Paste
-	            case Keys.V:
-	            {
-	                if (evt.ctrl)
-	                {
-	                    context.PreventDefault();
-	                    DoPaste();
-	                }
-
-	                break;
-	            }
-
-	            //Cut
-	            case Keys.X:
-	            {
-	                if (evt.ctrl && !_displayAsPassword)
-	                {
-	                    context.PreventDefault();
-	                    string s = GetSelection();
-	                    if (!string.IsNullOrEmpty(s))
-	                    {
-	                        DoCopy(s);
-	                        ReplaceSelection(null);
-	                    }
-	                }
-
-	                break;
-	            }
-
-	            case Keys.Enter:
-	            {
-	                if (textField.singleLine)
-	                {
-	                    onSubmit.Call();
-	                    return;
-	                }
-
-	                break;
-	            }
-	        }
-
-	        string str = evt.KeyName;
-	        if (!string.IsNullOrEmpty(str))
-	        {
-                if (evt.ctrl)
-	                return;
-
-	            if (textField.singleLine && str == "\n")
-	                return;
-
-	            if (_compositionReceived)
-	                return;
-
-                ReplaceSelection(str);
-	        }
-	        else
-	        {
-	            if (IMEAdapter.compositionString.Length > 0)
-	                UpdateText();
-	        }
-	    }
-
-	    internal void CheckComposition()
+		void __keydown(EventContext context)
 		{
-			if (_composing != 0 && IMEAdapter.compositionString.Length == 0)
+			if (!_editing || context.isDefaultPrevented)
+				return;
+
+			InputEvent evt = context.inputEvent;
+
+			switch (evt.keyCode)
+			{
+				case Keys.Back:
+					{
+						context.PreventDefault();
+						if (_selectionStart == _caretPosition && _caretPosition > 0)
+							_selectionStart = _caretPosition - 1;
+						ReplaceSelection(null);
+						break;
+					}
+
+				case Keys.Delete:
+					{
+						context.PreventDefault();
+						if (_selectionStart == _caretPosition && _caretPosition < textField.charPositions.Count - 1)
+							_selectionStart = _caretPosition + 1;
+						ReplaceSelection(null);
+						break;
+					}
+
+				case Keys.Left:
+					{
+						context.PreventDefault();
+						if (!evt.shift)
+							ClearSelection();
+						if (_caretPosition > 0)
+						{
+							TextField.CharPosition cp = GetCharPosition(_caretPosition - 1);
+							AdjustCaret(cp, !evt.shift);
+						}
+
+						break;
+					}
+
+				case Keys.Right:
+					{
+						context.PreventDefault();
+						if (!evt.shift)
+							ClearSelection();
+						if (_caretPosition < textField.charPositions.Count - 1)
+						{
+							TextField.CharPosition cp = GetCharPosition(_caretPosition + 1);
+							AdjustCaret(cp, !evt.shift);
+						}
+
+						break;
+					}
+
+				case Keys.Up:
+					{
+						context.PreventDefault();
+						if (!evt.shift)
+							ClearSelection();
+
+						TextField.CharPosition cp = GetCharPosition(_caretPosition);
+						if (cp.lineIndex == 0)
+							return;
+
+						TextField.LineInfo line = textField.lines[cp.lineIndex - 1];
+						cp = GetCharPosition(new Vector2(_caret.x, line.y + textField.y));
+						AdjustCaret(cp, !evt.shift);
+						break;
+					}
+
+				case Keys.Down:
+					{
+						context.PreventDefault();
+						if (!evt.shift)
+							ClearSelection();
+
+						TextField.CharPosition cp = GetCharPosition(_caretPosition);
+						if (cp.lineIndex == textField.lines.Count - 1)
+							cp.charIndex = textField.charPositions.Count - 1;
+						else
+						{
+							TextField.LineInfo line = textField.lines[cp.lineIndex + 1];
+							cp = GetCharPosition(new Vector2(_caret.x, line.y + textField.y));
+						}
+
+						AdjustCaret(cp, !evt.shift);
+						break;
+					}
+
+				case Keys.PageUp:
+					{
+						context.PreventDefault();
+						ClearSelection();
+
+						break;
+					}
+
+				case Keys.PageDown:
+					{
+						context.PreventDefault();
+						ClearSelection();
+
+						break;
+					}
+
+				case Keys.Home:
+					{
+						context.PreventDefault();
+						if (!evt.shift)
+							ClearSelection();
+
+						TextField.CharPosition cp = GetCharPosition(_caretPosition);
+						TextField.LineInfo line = textField.lines[cp.lineIndex];
+						cp = GetCharPosition(new Vector2(int.MinValue, line.y + textField.y));
+						AdjustCaret(cp, !evt.shift);
+						break;
+					}
+
+				case Keys.End:
+					{
+						context.PreventDefault();
+						if (!evt.shift)
+							ClearSelection();
+
+						TextField.CharPosition cp = GetCharPosition(_caretPosition);
+						TextField.LineInfo line = textField.lines[cp.lineIndex];
+						cp = GetCharPosition(new Vector2(int.MaxValue, line.y + textField.y));
+						AdjustCaret(cp, !evt.shift);
+
+						break;
+					}
+
+				//Select All
+				case Keys.A:
+					{
+						if (evt.ctrl)
+						{
+							context.PreventDefault();
+							_selectionStart = 0;
+							AdjustCaret(GetCharPosition(int.MaxValue));
+						}
+
+						break;
+					}
+
+				//Copy
+				case Keys.C:
+					{
+						if (evt.ctrl && !_displayAsPassword)
+						{
+							context.PreventDefault();
+							string s = GetSelection();
+							if (!string.IsNullOrEmpty(s))
+								DoCopy(s);
+						}
+
+						break;
+					}
+
+				//Paste
+				case Keys.V:
+					{
+						if (evt.ctrl)
+						{
+							context.PreventDefault();
+							DoPaste();
+						}
+
+						break;
+					}
+
+				//Cut
+				case Keys.X:
+					{
+						if (evt.ctrl && !_displayAsPassword)
+						{
+							context.PreventDefault();
+							string s = GetSelection();
+							if (!string.IsNullOrEmpty(s))
+							{
+								DoCopy(s);
+								ReplaceSelection(null);
+							}
+						}
+
+						break;
+					}
+
+				case Keys.Enter:
+					{
+						if (textField.singleLine)
+						{
+							onSubmit.Call();
+							return;
+						}
+
+						break;
+					}
+			}
+
+			string str = evt.KeyName;
+			if (!string.IsNullOrEmpty(str))
+			{
+				if (evt.ctrl)
+					return;
+
+				if (textField.singleLine && str == "\n")
+					return;
+
+				if (!CanInsert)
+					return;
+
+				ReplaceSelection(str);
+			}
+			else
+			{
+				if (IMEAdapter.CompositionString.Length > 0)
+					UpdateText();
+			}
+		}
+
+		internal void CheckComposition()
+		{
+			if (_composing != 0 && IMEAdapter.CompositionString.Length == 0)
 				UpdateText();
 		}
 	}

@@ -17,7 +17,6 @@ namespace FairyGUI.Scripts.Core.Text
             _nativeWnd.onResultReceived += (s, e) => { onResultReceived?.Invoke(s, e); };
             _nativeWnd.onStartCompositionReceived += (s, e) => { onStartCompositionReceived?.Invoke(s, e); };
             _nativeWnd.onEndCompositionReceived += (s, e) => { onEndCompositionReceived?.Invoke(s, e); };
-            _nativeWnd.onKeyDownReceived += (sender, args) => { onKeyDownReceived?.Invoke(sender, args); };
             game.Exiting += (o, e) => this.Dispose();
         }
 
@@ -44,8 +43,6 @@ namespace FairyGUI.Scripts.Core.Text
         /// Called when a new result character is coming
         /// </summary>
         public event EventHandler<IMEResultEventArgs> onResultReceived;
-        
-        public event EventHandler<IMEResultEventArgs> onKeyDownReceived;
 
         /// <summary>
         /// Array of the candidates

@@ -266,10 +266,6 @@ namespace FairyGUI.Scripts.Core.Text
                 case IMM.ImeComposition: IMEComposition(msg.LParam.ToInt32()); break;
                 case IMM.ImeEndComposition: IMEEndComposition(msg.LParam.ToInt32()); break;
                 case IMM.Char: CharEvent(msg.WParam.ToInt32()); break;
-                case IMM.ImnSetConversionMode: break;
-                case IMM.ImeRequest: break;
-                case IMM.KeyDown: KeyDownEvent(msg.WParam.ToInt32());
-                    break;
             }
             base.WndProc(ref msg);
         }

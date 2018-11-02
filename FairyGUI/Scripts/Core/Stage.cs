@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using FairyGUI.Scripts.Core.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -71,6 +72,8 @@ namespace FairyGUI
 			_inst = this;
 			Stage.game = game;
 		    Handler = new IMEHandler(game);
+			Handler.onResultReceived += HandlerOnOnResultReceived;
+			Handler.onCandidatesReceived += HandlerOnOnCandidatesReceived;
 
             soundVolume = 1;
 
@@ -87,7 +90,46 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-	    /// <summary>
+		private void HandlerOnOnCandidatesReceived(object sender, EventArgs e)
+		{
+			if (_focused is InputTextField field)
+				field.CanInsert = false;
+		}
+
+
+		private void HandlerOnOnResultReceived(object sender, IMEResultEventArgs e)
+		{
+			switch ((int)e.result)
+			{
+				case 8:
+					break;
+				case 27:
+				case 13:
+					break;
+				default:
+					if (_focused is InputTextField field)
+					{
+						if (!CheckStringChineseReg(e.result.ToString()))
+						{
+							field.CanInsert = true;
+							break;
+						}
+
+						field.ReplaceSelection(e.result.ToString());
+					}
+
+					break;
+			}
+		}
+
+		private bool CheckStringChineseReg(string t)
+		{
+			bool res = Regex.IsMatch(t, @"[\u4e00-\u9fbb]+$");
+
+			return res;
+		}
+
+		/// <summary>
 		/// 
 		/// </summary>
 		public void Initialize()
@@ -484,7 +526,7 @@ namespace FairyGUI
 			InputTextField textField = (InputTextField)_focused;
 			if (!textField.editable)
 				return;
-
+			
 			textField.CheckComposition();
 		}
 
