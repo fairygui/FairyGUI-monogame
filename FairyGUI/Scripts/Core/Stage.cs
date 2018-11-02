@@ -93,8 +93,8 @@ namespace FairyGUI
 
 		private void HandlerOnOnCandidatesReceived(object sender, EventArgs e)
 		{
-			if (_focused is InputTextField field)
-				field.CanInsert = false;
+			if (_focused is InputTextField)
+				((InputTextField)_focused).CanInsert = false;
 		}
 
 
@@ -108,8 +108,10 @@ namespace FairyGUI
 				case 13:
 					break;
 				default:
-					if (_focused is InputTextField field)
+					if (_focused is InputTextField)
 					{
+						var field = (InputTextField) _focused;
+
 						if (!CheckStringChineseReg(e.result.ToString()))
 						{
 							field.CanInsert = true;
