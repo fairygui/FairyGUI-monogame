@@ -20,7 +20,7 @@ namespace FairyGUI
 
 		public static CompositionMode compositionMode
 		{
-		    set
+			set
 		    {
 		        if (value == CompositionMode.On)
 		            Stage.Handler.Enabled = true;
@@ -30,7 +30,7 @@ namespace FairyGUI
 		        _compositionMode = value;
 
 		    }
-		    get => _compositionMode;
+			get { return _compositionMode; }
 		}
 
 		public static string CompositionString
