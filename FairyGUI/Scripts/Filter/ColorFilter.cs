@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace FairyGUI
 {
@@ -12,6 +13,8 @@ namespace FairyGUI
 
 		DisplayObject _target;
 		float[] _matrix;
+		EffectPass _pass;
+		EffectParameter[] _params;
 
 		const float LUMA_R = 0.299f;
 		const float LUMA_G = 0.587f;
@@ -32,18 +35,50 @@ namespace FairyGUI
 			set
 			{
 				_target = value;
+
+				if (_target != null && !(_target is Image) && !(_target is MovieClip))
+				{
+					_target.EnterPaintingMode(1, null);
+				}
 			}
 		}
 
 		public void Dispose()
 		{
-
+			if (_target != null && !(_target is Image) && !(_target is MovieClip))
+			{
+				_target.LeavePaintingMode(1);
+			}
 			_target = null;
 		}
 
 		public void Update()
 		{
 
+		}
+
+		public void Apply(FairyBatch batch)
+		{
+			if (_pass == null)
+			{
+				Effect effect = batch.defaultEffect;
+				_pass = effect.Techniques["ColorFilter"].Passes[0];
+				_params = new EffectParameter[] {
+					effect.Parameters["ColorMatrix0"],
+					effect.Parameters["ColorMatrix1"],
+					effect.Parameters["ColorMatrix2"],
+					effect.Parameters["ColorMatrix3"],
+					effect.Parameters["ColorMatrix4"]
+				};
+			}
+
+			_params[0].SetValue(new Vector4(_matrix[0], _matrix[1], _matrix[2], _matrix[3]));
+			_params[1].SetValue(new Vector4(_matrix[5], _matrix[6], _matrix[7], _matrix[8]));
+			_params[2].SetValue(new Vector4(_matrix[10], _matrix[11], _matrix[12], _matrix[13]));
+			_params[3].SetValue(new Vector4(_matrix[15], _matrix[16], _matrix[17], _matrix[18]));
+			_params[4].SetValue(new Vector4(_matrix[4], _matrix[9], _matrix[14], _matrix[19]));
+
+			_pass.Apply();
 		}
 
 		public void Invert()
@@ -148,8 +183,6 @@ namespace FairyGUI
 		public void Reset()
 		{
 			Array.Copy(IDENTITY, _matrix, _matrix.Length);
-
-			UpdateMatrix();
 		}
 
 		static float[] tmp = new float[20];
@@ -175,14 +208,6 @@ namespace FairyGUI
 				i += 5;
 			}
 			Array.Copy(tmp, _matrix, tmp.Length);
-
-			UpdateMatrix();
 		}
-
-		void UpdateMatrix()
-		{
-
-		}
-
 	}
 }

@@ -8,51 +8,84 @@ using RectangleF = System.Drawing.RectangleF;
 namespace FairyGUI
 {
 	/// <summary>
-	/// UpdateContext is for internal use.
+	/// FairyBatch is for internal use.
 	/// </summary>
 	public class FairyBatch
 	{
-		public struct ClipInfo
+		struct RenderTarget
 		{
-			public RectangleF rect;
-			public uint clipId;
+			public RenderTarget2D target;
+			public Vector2 origin;
 		}
-
-		public bool clipped;
-		public ClipInfo clipInfo;
 
 		public float alpha;
 		public bool grayed;
 
-		Stack<ClipInfo> _clipStack;
+		Stack<RectangleF> _clipStack;
+		bool _clipped;
+		RectangleF _clipRect;
+
+		Stack<RenderTarget> _renderTargets;
+		bool _hasRenderTarget;
+		Vector2 _renderOffset;
+
 		VertexPositionColorTexture[] _vertexCache;
 		int[] _indexCache;
 		int _vertexPtr;
 		int _indexPtr;
-		GraphicsDevice _device;
-		SpriteBatch _batch;
+
 		BlendMode _blendMode;
+		bool _grayed;
+
+		GraphicsDevice _device;
+		Viewport _originalViewPort;
 		Texture2D _texture;
 		RasterizerState _scissorTestEnabled;
 
+		SpriteEffect _spriteEffect;
+		EffectPass _spritePass;
+
+		Effect _defaultEffect;
+		EffectPass _defaultPass;
+		EffectPass _grayedPass;
+
 		public FairyBatch()
 		{
-			_clipStack = new Stack<ClipInfo>();
+			_clipStack = new Stack<RectangleF>();
+			_renderTargets = new Stack<RenderTarget>();
 			_vertexCache = new VertexPositionColorTexture[1024];
 			_indexCache = new int[1024];
 
 			_device = Stage.game.GraphicsDevice;
-			_batch = new SpriteBatch(_device);
 
 			_scissorTestEnabled = new RasterizerState();
 			_scissorTestEnabled.CullMode = CullMode.None;
 			_scissorTestEnabled.ScissorTestEnable = true;
+
+			_defaultEffect = Stage.game.Content.Load<Effect>("FairyGUI");
+			_defaultPass = _defaultEffect.Techniques["Default"].Passes[0];
+			_grayedPass = _defaultEffect.Techniques["Grayed"].Passes[0];
+
+			_spriteEffect = new SpriteEffect(_device);
+			_spritePass = _spriteEffect.CurrentTechnique.Passes[0];
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public void Dispose()
 		{
-			_batch.Dispose();
 			_scissorTestEnabled.Dispose();
+			_defaultEffect.Dispose();
+			_spriteEffect.Dispose();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public Effect defaultEffect
+		{
+			get { return _defaultEffect; }
 		}
 
 		/// <summary>
@@ -62,16 +95,26 @@ namespace FairyGUI
 		{
 			grayed = false;
 			alpha = 1;
+
 			_blendMode = BlendMode.Normal;
 			_texture = null;
-
-			clipped = false;
+			_grayed = false;
+			_clipped = false;
 			_clipStack.Clear();
+			_renderTargets.Clear();
+			_hasRenderTarget = false;
 
 			Stats.ObjectCount = 0;
 			Stats.GraphicsCount = 0;
 
-			_batch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied);
+			_originalViewPort = _device.Viewport;
+			_device.BlendState = BlendState.NonPremultiplied;
+			_device.DepthStencilState = DepthStencilState.None;
+			_device.RasterizerState = RasterizerState.CullNone;
+			_device.SamplerStates[0] = SamplerState.LinearClamp;
+
+			_spritePass.Apply();
+			_defaultPass.Apply();
 		}
 
 		/// <summary>
@@ -80,29 +123,26 @@ namespace FairyGUI
 		public void End()
 		{
 			Flush();
-			_batch.End();
 		}
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="clipId"></param>
 		/// <param name="clipRect"></param>
-		/// <param name="softness"></param>
-		public void EnterClipping(uint clipId, RectangleF clipRect)
+		public void EnterClipping(RectangleF clipRect)
 		{
-			_clipStack.Push(clipInfo);
+			Flush();
 
-			if (clipped)
-				clipRect = ToolSet.Intersection(ref clipInfo.rect, ref clipRect);
+			_clipStack.Push(_clipRect);
 
-			clipped = true;
-			clipInfo.rect = clipRect;
-			clipInfo.clipId = clipId;
+			if (_clipped)
+				clipRect = ToolSet.Intersection(ref _clipRect, ref clipRect);
 
-			ChangeState();
+			_device.RasterizerState = _scissorTestEnabled;
 
-			SetScissor(clipInfo.rect);
+			_clipped = true;
+			_clipRect = clipRect;
+			SetScissor();
 		}
 
 		/// <summary>
@@ -110,16 +150,58 @@ namespace FairyGUI
 		/// </summary>
 		public void LeaveClipping()
 		{
-			clipInfo = _clipStack.Pop();
-			clipped = _clipStack.Count > 0;
+			Flush();
 
-			ChangeState();
+			_clipRect = _clipStack.Pop();
+			_clipped = _clipStack.Count > 0;
 
-			if (clipped)
-				SetScissor(clipInfo.rect);
+			if (_clipped)
+				SetScissor();
+			else
+				_device.RasterizerState = RasterizerState.CullNone;
 		}
 
-		public void Draw(NGraphics graphics, float alpha, bool grayed, BlendMode blendMode, Matrix localToWorldMatrix)
+		//TODO: not worked
+		public void PushRenderTarget(NTexture texture, Vector2 origin)
+		{
+			Flush();
+
+			RenderTarget rt = new RenderTarget() { target = (RenderTarget2D)texture.nativeTexture, origin = origin };
+			_renderTargets.Push(rt);
+			//_device.SetRenderTarget(rt.target);
+
+			//_device.Viewport = new Viewport(0, 0, rt.target.Width, rt.target.Height);
+			//_spritePass.Apply();
+
+			//_hasRenderTarget = true;
+			_renderOffset = origin;
+		}
+
+		public void PopRenderTarget()
+		{
+			Flush();
+
+			_renderTargets.Pop();
+			if (_renderTargets.Count > 0)
+			{
+				RenderTarget rt = _renderTargets.Peek();
+
+				//_device.Viewport = new Viewport(0, 0, rt.target.Width, rt.target.Height);
+				//_device.SetRenderTarget(rt.target);
+
+				//_hasRenderTarget = true;
+				_renderOffset = rt.origin;
+			}
+			else
+			{
+				//_device.Viewport = _originalViewPort;
+				//_device.SetRenderTarget(null);
+				//_hasRenderTarget = false;
+			}
+			//_spritePass.Apply();
+		}
+
+		public void Draw(NGraphics graphics, float alpha, bool grayed, BlendMode blendMode, ref Matrix localToWorldMatrix, IFilter filter)
 		{
 			if (graphics.texture == null || !graphics.enabled)
 				return;
@@ -130,8 +212,22 @@ namespace FairyGUI
 
 			if (_blendMode != blendMode)
 			{
+				Flush();
+
 				_blendMode = blendMode;
-				ChangeState();
+				_device.BlendState = BlendModeUtils.blendStates[(int)_blendMode];
+			}
+
+			grayed |= this.grayed;
+			if (_grayed != grayed)
+			{
+				Flush();
+
+				_grayed = grayed;
+				if (_grayed)
+					_grayedPass.Apply();
+				else
+					_defaultPass.Apply();
 			}
 
 			Texture2D texture = graphics.texture.nativeTexture;
@@ -139,6 +235,14 @@ namespace FairyGUI
 			{
 				Flush();
 				_texture = texture;
+			}
+
+			if (filter != null)
+			{
+				if (_vertexPtr > 0)
+					Flush();
+
+				filter.Apply(this);
 			}
 
 			Vector3[] vertices = graphics.vertices;
@@ -171,19 +275,23 @@ namespace FairyGUI
 			for (int i = 0; i < vertCount; i++)
 			{
 				Vector3.Transform(ref vertices[i], ref localToWorldMatrix, out vpct.Position);
+				if (_hasRenderTarget)
+				{
+					vpct.Position.X -= _renderOffset.X;
+					vpct.Position.Y -= _renderOffset.Y;
+				}
 				vpct.TextureCoordinate = uv[i];
 				vpct.Color = colors[i] * this.alpha * alpha;
 				_vertexCache[_vertexPtr++] = vpct;
 			}
-		}
 
-		void ChangeState()
-		{
-			Flush();
+			if (filter != null)
+			{
+				if (_vertexPtr > 0)
+					Flush();
 
-			_batch.End();
-			_batch.Begin(SpriteSortMode.Immediate, BlendModeUtils.blendStates[(int)_blendMode], 
-				null, null, clipped ? _scissorTestEnabled : null);
+				_defaultPass.Apply();
+			}
 		}
 
 		void Flush()
@@ -191,6 +299,7 @@ namespace FairyGUI
 			if (_vertexPtr > 0)
 			{
 				_device.Textures[0] = _texture;
+
 				_device.DrawUserIndexedPrimitives(
 					PrimitiveType.TriangleList,
 					_vertexCache,
@@ -205,12 +314,15 @@ namespace FairyGUI
 			}
 		}
 
-		void SetScissor(RectangleF rect)
+		void SetScissor()
 		{
-			int rectX = (int)Math.Floor(rect.X);
-			int rectY = (int)Math.Floor(rect.Y);
-			_device.ScissorRectangle = new Rectangle(rectX, rectY,
-					(int)Math.Ceiling(rect.X + rect.Width) - rectX, (int)Math.Ceiling(rect.Y + rect.Height) - rectY);
+			int rectX = (int)Math.Floor(_clipRect.X);
+			int rectY = (int)Math.Floor(_clipRect.Y);
+			_device.ScissorRectangle = new Rectangle(
+				rectX,
+				rectY,
+				(int)Math.Ceiling(_clipRect.X + _clipRect.Width) - rectX,
+				(int)Math.Ceiling(_clipRect.Y + _clipRect.Height) - rectY);
 		}
 	}
 }

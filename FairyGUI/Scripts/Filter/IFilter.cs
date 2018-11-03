@@ -15,6 +15,11 @@
 		/// <summary>
 		/// 
 		/// </summary>
+		void Apply(FairyBatch batch);
+
+		/// <summary>
+		/// 
+		/// </summary>
 		void Dispose();
 	}
 }

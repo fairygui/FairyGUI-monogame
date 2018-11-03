@@ -283,3 +283,9 @@
 /processorParam:TextureFormat=Color
 /build:UI/VirtualList_atlas0.png
 
+#begin FairyGUI.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:FairyGUI.fx
+

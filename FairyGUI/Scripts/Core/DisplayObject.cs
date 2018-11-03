@@ -112,8 +112,8 @@ namespace FairyGUI
 		Vector2 _skew;
 		float _alpha;
 		bool _grayed;
-		IFilter _filter;
-		BlendMode _blendMode;
+		protected IFilter _filter;
+		protected BlendMode _blendMode;
 
 		protected int _paintingMode; //1-滤镜，2-blendMode，4-transformMatrix, 8-cacheAsBitmap
 		protected Margin _paintingMargin;
@@ -159,7 +159,7 @@ namespace FairyGUI
 			onRemovedFromStage = new EventListener(this, "onRemovedFromStage");
 			onKeyDown = new EventListener(this, "onKeyDown");
 			onClickLink = new EventListener(this, "onClickLink");
-        }
+		}
 
 		/// <summary>
 		/// 
@@ -898,8 +898,7 @@ namespace FairyGUI
 							paintingTexture.Dispose();
 						if (textureWidth > 0 && textureHeight > 0)
 						{
-							var texture = new Texture2D(Stage.game.GraphicsDevice, textureWidth, textureHeight);
-							texture.SetData(new byte[textureWidth * textureHeight * 4]);
+							var texture = new RenderTarget2D(Stage.game.GraphicsDevice, textureWidth, textureHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
 							paintingTexture = new NTexture(texture);
 							Stage.inst.MonitorTexture(paintingTexture);
 						}
@@ -922,6 +921,9 @@ namespace FairyGUI
 					paintingTexture.lastActive = Timers.time;
 			}
 
+			if (_filter != null)
+				_filter.Update();
+
 			Stats.ObjectCount++;
 		}
 
@@ -929,11 +931,26 @@ namespace FairyGUI
 		{
 			ValidateMatrix(false);
 
-			if (graphics != null)
-				batch.Draw(graphics, _alpha, _grayed, _blendMode, _localToWorldMatrix);
+			if (_paintingMode != 0)
+			{
+				if (graphics != null && paintingGraphics.texture != null)
+				{
+					batch.PushRenderTarget(paintingGraphics.texture, 
+						Vector2.Transform(Vector2.Zero, _localToWorldMatrix) + new Vector2(_paintingMargin.left, _paintingMargin.top));
 
-			if (_filter != null)
-				_filter.Update();
+					batch.Draw(graphics, _alpha, _grayed, BlendMode.Normal, ref _localToWorldMatrix, null);
+
+					batch.PopRenderTarget();
+				}
+
+				if (!(this is Container))
+					batch.Draw(paintingGraphics, 1, false, _blendMode, ref _localToWorldMatrix, _filter);
+			}
+			else
+			{
+				if (graphics != null)
+					batch.Draw(graphics, _alpha, _grayed, _blendMode, ref _localToWorldMatrix, _filter);
+			}
 		}
 
 		virtual public void Dispose()

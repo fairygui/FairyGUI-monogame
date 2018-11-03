@@ -490,13 +490,19 @@ namespace FairyGUI
 		{
 			base.Draw(batch);
 
+			if (_paintingMode != 0 && paintingGraphics.texture != null)
+			{
+				batch.PushRenderTarget(paintingGraphics.texture, 
+					Vector2.Transform(Vector2.Zero, _localToWorldMatrix) + new Vector2(_paintingMargin.left, _paintingMargin.top));
+			}
+
 			if (_clipRect != null)
 			{
 				//在这里可以直接使用 _localToWorldMatrix， 因为已经更新
 				Rectangle clipRect = (Rectangle)_clipRect;
 				Matrix mat = Matrix.Identity;
 				ToolSet.TransformRect(ref clipRect, ref _localToWorldMatrix, ref mat);
-				batch.EnterClipping(this.id, clipRect);
+				batch.EnterClipping(clipRect);
 			}
 
 			float savedAlpha = batch.alpha;
@@ -514,6 +520,12 @@ namespace FairyGUI
 
 			if (_clipRect != null)
 				batch.LeaveClipping();
+
+			if (_paintingMode != 0 && paintingGraphics.texture != null)
+			{
+				batch.PopRenderTarget();
+				batch.Draw(paintingGraphics, 1, false, _blendMode, ref _localToWorldMatrix, _filter);
+			}
 
 			batch.alpha = savedAlpha;
 			batch.grayed = savedGrayed;
