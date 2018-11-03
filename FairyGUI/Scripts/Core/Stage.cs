@@ -75,7 +75,7 @@ namespace FairyGUI
 			Handler = new IMEHandler(game);
 			Handler.onResultReceived += HandlerOnOnResultReceived;
 			Handler.onCandidatesReceived += HandlerOnOnCandidatesReceived;
-            Handler.onCompositionReceived += HandlerOnOnCompositionReceived;
+			Handler.onCompositionReceived += HandlerOnOnCompositionReceived;
 
 			soundVolume = 1;
 
@@ -92,13 +92,13 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-	    private void HandlerOnOnCompositionReceived(object sender, EventArgs e)
-	    {
-	        if (_focused is InputTextField)
-	            ((InputTextField)_focused).CanInsert = false;
-        }
+		private void HandlerOnOnCompositionReceived(object sender, EventArgs e)
+		{
+			if (_focused is InputTextField)
+				((InputTextField) _focused).CanInsert = false;
+		}
 
-	    private void HandlerOnOnCandidatesReceived(object sender, EventArgs e)
+		private void HandlerOnOnCandidatesReceived(object sender, EventArgs e)
 		{
 			if (_focused is InputTextField)
 				((InputTextField)_focused).CanInsert = false;
