@@ -164,14 +164,18 @@ namespace FairyGUI
 		public int DrawOrder { get { return 0; } }
 		public bool Visible { get { return true; } }
 
+#pragma warning disable 0067
 		public event EventHandler<EventArgs> DrawOrderChanged;
 		public event EventHandler<EventArgs> VisibleChanged;
+#pragma warning restore 0067
 
 		public bool Enabled { get { return true; } }
 		public int UpdateOrder { get { return 0; } }
 
+#pragma warning disable 0067
 		public event EventHandler<EventArgs> EnabledChanged;
 		public event EventHandler<EventArgs> UpdateOrderChanged;
+#pragma warning restore 0067
 
 		/// <summary>
 		/// 

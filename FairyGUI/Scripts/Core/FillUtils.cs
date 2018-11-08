@@ -135,14 +135,14 @@ namespace FairyGUI
 		/// <param name="uv"></param>
 		public static void FillVertical(OriginVertical origin, float amount, Rectangle vertRect, Rectangle uvRect, Vector3[] verts, Vector2[] uv)
 		{
-			if (origin == OriginVertical.Bottom)
+			if (origin == OriginVertical.Top)
 			{
-				vertRect.Y += vertRect.Height * (1 - amount);
 				vertRect.Height = vertRect.Height * amount;
 				uvRect.Height = uvRect.Height * amount;
 			}
 			else
 			{
+				vertRect.Y += vertRect.Height * (1 - amount);
 				vertRect.Height = vertRect.Height * amount;
 				uvRect.Y += uvRect.Height * (1 - amount);
 				uvRect.Height = uvRect.Height * amount;
@@ -195,8 +195,8 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[3].Y += h;
-								uv[3].Y += uvRect.Height * ratio;
+								verts[3].Y -= h;
+								uv[3].Y -= uvRect.Height * ratio;
 							}
 						}
 						else
@@ -212,10 +212,10 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[2].Y -= vertRect.Height * (1 - ratio);
+								verts[2].Y += vertRect.Height * (1 - ratio);
 								verts[1] = verts[2];
 
-								uv[2].Y -= uvRect.Height * (1 - ratio);
+								uv[2].Y += uvRect.Height * (1 - ratio);
 								uv[1] = uv[2];
 							}
 						}
@@ -237,10 +237,10 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[1].Y -= vertRect.Height * (1 - ratio);
+								verts[1].Y += vertRect.Height * (1 - ratio);
 								verts[2] = verts[3];
 
-								uv[1].Y -= uvRect.Height * (1 - ratio);
+								uv[1].Y += uvRect.Height * (1 - ratio);
 								uv[2] = uv[3];
 							}
 						}
@@ -260,8 +260,8 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[0].Y += h;
-								uv[0].Y += uvRect.Height * ratio;
+								verts[0].Y -= h;
+								uv[0].Y -= uvRect.Height * ratio;
 							}
 						}
 					}
@@ -282,10 +282,10 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[3].Y += vertRect.Height * (1 - ratio);
+								verts[3].Y -= vertRect.Height * (1 - ratio);
 								verts[0] = verts[3];
 
-								uv[3].Y += uvRect.Height * (1 - ratio);
+								uv[3].Y -= uvRect.Height * (1 - ratio);
 								uv[0] = uv[3];
 							}
 						}
@@ -304,8 +304,8 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[2].Y -= h;
-								uv[2].Y -= uvRect.Height * ratio;
+								verts[2].Y += h;
+								uv[2].Y += uvRect.Height * ratio;
 							}
 						}
 					}
@@ -328,8 +328,8 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[1].Y -= vertRect.Height * ratio;
-								uv[1].Y -= uvRect.Height * ratio;
+								verts[1].Y += vertRect.Height * ratio;
+								uv[1].Y += uvRect.Height * ratio;
 							}
 						}
 						else
@@ -345,9 +345,9 @@ namespace FairyGUI
 							else
 							{
 								float ratio = h / vertRect.Height;
-								verts[0].Y += vertRect.Height * (1 - ratio);
+								verts[0].Y -= vertRect.Height * (1 - ratio);
 								verts[3] = verts[0];
-								uv[0].Y += uvRect.Height * (1 - ratio);
+								uv[0].Y -= uvRect.Height * (1 - ratio);
 								uv[3] = uv[0];
 							}
 						}
@@ -457,15 +457,12 @@ namespace FairyGUI
 				case Origin180.Left:
 					if (amount <= 0.5f)
 					{
-						if (clockwise)
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
+						if (!clockwise)
 						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						amount = amount / 0.5f;
 						FillRadial90(clockwise ? Origin90.BottomLeft : Origin90.TopLeft, amount, clockwise, vertRect, uvRect, verts, uv);
@@ -474,15 +471,12 @@ namespace FairyGUI
 					}
 					else
 					{
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
 						if (clockwise)
 						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						amount = (amount - 0.5f) / 0.5f;
 						FillRadial90(clockwise ? Origin90.TopLeft : Origin90.BottomLeft, amount, clockwise, vertRect, uvRect, verts, uv);
@@ -490,12 +484,12 @@ namespace FairyGUI
 						if (clockwise)
 						{
 							vertRect.Y -= vertRect.Height;
-							uvRect.Y += uvRect.Height;
+							uvRect.Y -= uvRect.Height;
 						}
 						else
 						{
 							vertRect.Y += vertRect.Height;
-							uvRect.Y -= uvRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						NGraphics.FillVertsOfQuad(verts, 4, vertRect);
 						NGraphics.FillUVOfQuad(uv, 4, uvRect);
@@ -505,15 +499,12 @@ namespace FairyGUI
 				case Origin180.Right:
 					if (amount <= 0.5f)
 					{
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
 						if (clockwise)
 						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						amount = amount / 0.5f;
 						FillRadial90(clockwise ? Origin90.TopRight : Origin90.BottomRight, amount, clockwise, vertRect, uvRect, verts, uv);
@@ -522,15 +513,12 @@ namespace FairyGUI
 					}
 					else
 					{
-						if (clockwise)
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
+						if (!clockwise)
 						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						amount = (amount - 0.5f) / 0.5f;
 						FillRadial90(clockwise ? Origin90.BottomRight : Origin90.TopRight, amount, clockwise, vertRect, uvRect, verts, uv);
@@ -538,12 +526,12 @@ namespace FairyGUI
 						if (clockwise)
 						{
 							vertRect.Y += vertRect.Height;
-							uvRect.Y -= uvRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						else
 						{
 							vertRect.Y -= vertRect.Height;
-							uvRect.Y += uvRect.Height;
+							uvRect.Y -= uvRect.Height;
 						}
 						NGraphics.FillVertsOfQuad(verts, 4, vertRect);
 						NGraphics.FillUVOfQuad(uv, 4, uvRect);
@@ -569,7 +557,6 @@ namespace FairyGUI
 				case Origin360.Top:
 					if (amount < 0.5f)
 					{
-						amount = amount / 0.5f;
 						vertRect.Width /= 2;
 						uvRect.Width /= 2;
 						if (clockwise)
@@ -577,6 +564,7 @@ namespace FairyGUI
 							vertRect.X += vertRect.Width;
 							uvRect.X += uvRect.Width;
 						}
+						amount = amount / 0.5f;
 						FillRadial180(clockwise ? Origin180.Left : Origin180.Right, amount, clockwise, vertRect, uvRect, verts, uv);
 						verts[8] = verts[9] = verts[10] = verts[11] = verts[7];
 						uv[8] = uv[9] = uv[10] = uv[11] = uv[7];
@@ -596,7 +584,7 @@ namespace FairyGUI
 						if (clockwise)
 						{
 							vertRect.X += vertRect.Width;
-							uvRect.X+= uvRect.Width;
+							uvRect.X += uvRect.Width;
 						}
 						else
 						{
@@ -611,7 +599,6 @@ namespace FairyGUI
 				case Origin360.Bottom:
 					if (amount < 0.5f)
 					{
-						amount = amount / 0.5f;
 						vertRect.Width /= 2;
 						uvRect.Width /= 2;
 						if (!clockwise)
@@ -619,6 +606,7 @@ namespace FairyGUI
 							vertRect.X += vertRect.Width;
 							uvRect.X += uvRect.Width;
 						}
+						amount = amount / 0.5f;
 						FillRadial180(clockwise ? Origin180.Right : Origin180.Left, amount, clockwise, vertRect, uvRect, verts, uv);
 						verts[8] = verts[9] = verts[10] = verts[11] = verts[7];
 						uv[8] = uv[9] = uv[10] = uv[11] = uv[7];
@@ -653,32 +641,26 @@ namespace FairyGUI
 				case Origin360.Left:
 					if (amount < 0.5f)
 					{
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
+						if (!clockwise)
+						{
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
+						}
 						amount = amount / 0.5f;
-						if (clockwise)
-						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
-						}
 						FillRadial180(clockwise ? Origin180.Bottom : Origin180.Top, amount, clockwise, vertRect, uvRect, verts, uv);
 						verts[8] = verts[9] = verts[10] = verts[11] = verts[7];
 						uv[8] = uv[9] = uv[10] = uv[11] = uv[7];
 					}
 					else
 					{
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
 						if (clockwise)
 						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						amount = (amount - 0.5f) / 0.5f;
 						FillRadial180(clockwise ? Origin180.Top : Origin180.Bottom, amount, clockwise, vertRect, uvRect, verts, uv);
@@ -686,12 +668,12 @@ namespace FairyGUI
 						if (clockwise)
 						{
 							vertRect.Y -= vertRect.Height;
-							uvRect.Y += uvRect.Height;
+							uvRect.Y -= uvRect.Height;
 						}
 						else
 						{
 							vertRect.Y += vertRect.Height;
-							uvRect.Y -= uvRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						NGraphics.FillVertsOfQuad(verts, 8, vertRect);
 						NGraphics.FillUVOfQuad(uv, 8, uvRect);
@@ -701,15 +683,12 @@ namespace FairyGUI
 				case Origin360.Right:
 					if (amount < 0.5f)
 					{
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
 						if (clockwise)
 						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
-						}
-						else
-						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						amount = amount / 0.5f;
 						FillRadial180(clockwise ? Origin180.Top : Origin180.Bottom, amount, clockwise, vertRect, uvRect, verts, uv);
@@ -718,29 +697,25 @@ namespace FairyGUI
 					}
 					else
 					{
-						if (clockwise)
+						vertRect.Height /= 2;
+						uvRect.Height /= 2;
+						if (!clockwise)
 						{
-							vertRect.Height /= 2;
-							uvRect.Y += uvRect.Height / 2;
+							vertRect.Y += vertRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
-						else
-						{
-							vertRect.Y += vertRect.Height / 2;
-							uvRect.Height -= uvRect.Height / 2;
-						}
-
 						amount = (amount - 0.5f) / 0.5f;
 						FillRadial180(clockwise ? Origin180.Bottom : Origin180.Top, amount, clockwise, vertRect, uvRect, verts, uv);
 
 						if (clockwise)
 						{
 							vertRect.Y += vertRect.Height;
-							uvRect.Y -= uvRect.Height;
+							uvRect.Y += uvRect.Height;
 						}
 						else
 						{
 							vertRect.Y -= vertRect.Height;
-							uvRect.Y += uvRect.Height;
+							uvRect.Y -= uvRect.Height;
 						}
 						NGraphics.FillVertsOfQuad(verts, 8, vertRect);
 						NGraphics.FillUVOfQuad(uv, 8, uvRect);
