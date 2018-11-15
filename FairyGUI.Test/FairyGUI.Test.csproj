@@ -106,6 +106,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Icons\i0.png" />
+    <Content Include="Content\Icons\i1.png" />
+    <Content Include="Content\Icons\i2.png" />
+    <Content Include="Content\Icons\i3.png" />
+    <Content Include="Content\Icons\i4.png" />
+    <Content Include="Content\Icons\i5.png" />
+    <Content Include="Content\Icons\i6.png" />
+    <Content Include="Content\Icons\i7.png" />
+    <Content Include="Content\Icons\i8.png" />
+    <Content Include="Content\Icons\i9.png" />
     <Content Include="Content\UI\Bag_atlas0.png" />
     <Content Include="Content\UI\Basics_atlas0.png" />
     <Content Include="Content\UI\Basics_atlas1.png" />
