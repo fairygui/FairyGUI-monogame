@@ -89,7 +89,7 @@ namespace FairyGUI.Test
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			GraphicsDevice.Clear(Color.CornflowerBlue);
+			GraphicsDevice.Clear(new Color(0xFF333333));
 
 			// TODO: Add your drawing code here
 

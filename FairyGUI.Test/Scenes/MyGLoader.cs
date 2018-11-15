@@ -1,31 +1,28 @@
-﻿using FairyGUI.Utils;
+﻿using System;
+using System.IO;
+using Microsoft.Xna.Framework.Graphics;
+using FairyGUI.Utils;
 
 namespace FairyGUI.Test.Scenes
 {
-    public class MyGLoader : GLoader
-    {
-        protected override void LoadExternal()
-        {
-            IconManager.inst.LoadIcon(this.url, OnLoadSuccess, OnLoadFail);
-        }
+	public class MyGLoader : GLoader
+	{
+		protected override void LoadExternal()
+		{
+			string file = Path.Combine("Icons", this.url);
+			try
+			{
+				Texture2D tex = Stage.game.Content.Load<Texture2D>(file);
+				onExternalLoadSuccess(new NTexture(tex));
+			}
+			catch (Exception e)
+			{
+				Log.Info("LoadExternal failed: " + file);
+			}
+		}
 
-        protected override void FreeExternal(NTexture texture)
-        {
-            texture.refCount--;
-        }
-
-        void OnLoadSuccess(NTexture texture)
-        {
-            if (string.IsNullOrEmpty(this.url))
-                return;
-
-            this.onExternalLoadSuccess(texture);
-        }
-
-        void OnLoadFail(string error)
-        {
-            Log.Error("load " + this.url + " failed: " + error);
-            this.onExternalLoadFailed();
-        }
-    }
+		protected override void FreeExternal(NTexture texture)
+		{
+		}
+	}
 }

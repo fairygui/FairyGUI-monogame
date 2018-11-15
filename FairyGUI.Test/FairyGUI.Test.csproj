@@ -53,7 +53,6 @@
     <Compile Include="Scenes\DemoScene.cs" />
     <Compile Include="Scenes\EmojiParser.cs" />
     <Compile Include="Scenes\HitTestScene.cs" />
-    <Compile Include="Scenes\IconManager.cs" />
     <Compile Include="Scenes\JoystickModule.cs" />
     <Compile Include="Scenes\JoystickScene.cs" />
     <Compile Include="Scenes\ListEffectScene.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rectangle = System.Drawing.RectangleF;
 
 namespace FairyGUI
@@ -418,6 +419,15 @@ namespace FairyGUI
 
 		virtual protected void LoadExternal()
 		{
+			try
+			{
+				Texture2D tex = Stage.game.Content.Load<Texture2D>(_url);
+				_content.texture = new NTexture(tex);
+			}
+			catch(Exception e)
+			{
+				Log.Info("LoadExternal failed: " + e.Message);
+			}
 		}
 
 		virtual protected void FreeExternal(NTexture texture)

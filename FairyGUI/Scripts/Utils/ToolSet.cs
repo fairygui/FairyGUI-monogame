@@ -280,6 +280,21 @@ namespace FairyGUI.Utils
 			return (maxValue - minValue) * value + minValue;
 		}
 
+		public static int Random(int minValue, int maxValue)
+		{
+			if (minValue > maxValue)
+			{
+				throw new System.ArgumentOutOfRangeException(nameof(maxValue),
+					$"The value of {nameof(minValue)} is greater than the value of {nameof(maxValue)}!");
+			}
+			float value;
+			lock (_syncLock)
+			{
+				value = (float)_random.NextDouble();
+			}
+			return (int)Math.Floor((maxValue - minValue) * value + minValue);
+		}
+
 		public static Matrix CreateMatrix(Vector3 trans, Vector3 euler, Vector3 scale, Vector2 skew)
 		{
 			Matrix matrix = Matrix.CreateRotationY(MathHelper.ToRadians(euler.Y))
