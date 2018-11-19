@@ -1041,7 +1041,7 @@ namespace FairyGUI
 
 			if (_virtual)
 			{
-				int lineCount =  (int)Math.Ceiling((float)itemCount / _curLineItemCount);
+				int lineCount = (int)Math.Ceiling((float)itemCount / _curLineItemCount);
 				if (_layout == ListLayoutType.SingleColumn || _layout == ListLayoutType.FlowHorizontal)
 					this.viewHeight = lineCount * _itemSize.Y + Math.Max(0, lineCount - 1) * _lineGap;
 				else
@@ -1170,14 +1170,14 @@ namespace FairyGUI
 				if (_layout == ListLayoutType.SingleColumn || _layout == ListLayoutType.FlowHorizontal)
 				{
 					float pos = 0;
-					for (int i = 0; i < index; i += _curLineItemCount)
+					for (int i = _curLineItemCount - 1; i < index; i += _curLineItemCount)
 						pos += _virtualItems[i].size.Y + _lineGap;
 					rect = new Rectangle(0, pos, _itemSize.X, ii.size.Y);
 				}
 				else if (_layout == ListLayoutType.SingleRow || _layout == ListLayoutType.FlowVertical)
 				{
 					float pos = 0;
-					for (int i = 0; i < index; i += _curLineItemCount)
+					for (int i = _curLineItemCount - 1; i < index; i += _curLineItemCount)
 						pos += _virtualItems[i].size.X + _columnGap;
 					rect = new Rectangle(pos, 0, ii.size.X, _itemSize.Y);
 				}
@@ -1186,7 +1186,7 @@ namespace FairyGUI
 					int page = index / (_curLineItemCount * _curLineItemCount2);
 					rect = new Rectangle(page * viewWidth + index % _curLineItemCount * (ii.size.X + _columnGap),
 						(index / _curLineItemCount) % _curLineItemCount2 * (ii.size.Y + _lineGap),
-					    ii.size.X, ii.size.Y);
+						ii.size.X, ii.size.Y);
 				}
 
 				setFirst = true;//因为在可变item大小的情况下，只有设置在最顶端，位置才不会因为高度变化而改变，所以只能支持setFirst=true
@@ -1506,7 +1506,7 @@ namespace FairyGUI
 						_curLineItemCount = _lineCount;
 					else
 					{
-						_curLineItemCount =  (int)Math.Floor((this.scrollPane.viewHeight + _lineGap) / (_itemSize.Y + _lineGap));
+						_curLineItemCount = (int)Math.Floor((this.scrollPane.viewHeight + _lineGap) / (_itemSize.Y + _lineGap));
 						if (_curLineItemCount <= 0)
 							_curLineItemCount = 1;
 					}
@@ -1517,7 +1517,7 @@ namespace FairyGUI
 						_curLineItemCount = _columnCount;
 					else
 					{
-						_curLineItemCount =  (int)Math.Floor((this.scrollPane.viewWidth + _columnGap) / (_itemSize.X + _columnGap));
+						_curLineItemCount = (int)Math.Floor((this.scrollPane.viewWidth + _columnGap) / (_itemSize.X + _columnGap));
 						if (_curLineItemCount <= 0)
 							_curLineItemCount = 1;
 					}
@@ -1526,7 +1526,7 @@ namespace FairyGUI
 						_curLineItemCount2 = _lineCount;
 					else
 					{
-						_curLineItemCount2 =  (int)Math.Floor((this.scrollPane.viewHeight + _lineGap) / (_itemSize.Y + _lineGap));
+						_curLineItemCount2 = (int)Math.Floor((this.scrollPane.viewHeight + _lineGap) / (_itemSize.Y + _lineGap));
 						if (_curLineItemCount2 <= 0)
 							_curLineItemCount2 = 1;
 					}
@@ -1795,8 +1795,8 @@ namespace FairyGUI
 			_firstIndex = newFirstIndex;
 			int curIndex = newFirstIndex;
 			bool forward = oldFirstIndex > newFirstIndex;
-			int oldCount = this.numChildren;
-			int lastIndex = oldFirstIndex + oldCount - 1;
+			int childCount = this.numChildren;
+			int lastIndex = oldFirstIndex + childCount - 1;
 			int reuseIndex = forward ? lastIndex : oldFirstIndex;
 			float curX = 0, curY = pos;
 			bool needRender;
@@ -1921,7 +1921,7 @@ namespace FairyGUI
 				curIndex++;
 			}
 
-			for (int i = 0; i < oldCount; i++)
+			for (int i = 0; i < childCount; i++)
 			{
 				ItemInfo ii = _virtualItems[oldFirstIndex + i];
 				if (ii.updateFlag != itemInfoVer && ii.obj != null)
@@ -1931,6 +1931,14 @@ namespace FairyGUI
 					RemoveChildToPool(ii.obj);
 					ii.obj = null;
 				}
+			}
+
+			childCount = _children.Count;
+			for (int i = 0; i < childCount; i++)
+			{
+				GObject obj = _virtualItems[newFirstIndex + i].obj;
+				if (_children[i] != obj)
+					SetChildIndex(obj, i);
 			}
 
 			if (deltaSize != 0 || firstItemDeltaSize != 0)
@@ -1962,8 +1970,8 @@ namespace FairyGUI
 			_firstIndex = newFirstIndex;
 			int curIndex = newFirstIndex;
 			bool forward = oldFirstIndex > newFirstIndex;
-			int oldCount = this.numChildren;
-			int lastIndex = oldFirstIndex + oldCount - 1;
+			int childCount = this.numChildren;
+			int lastIndex = oldFirstIndex + childCount - 1;
 			int reuseIndex = forward ? lastIndex : oldFirstIndex;
 			float curX = pos, curY = 0;
 			bool needRender;
@@ -2087,7 +2095,7 @@ namespace FairyGUI
 				curIndex++;
 			}
 
-			for (int i = 0; i < oldCount; i++)
+			for (int i = 0; i < childCount; i++)
 			{
 				ItemInfo ii = _virtualItems[oldFirstIndex + i];
 				if (ii.updateFlag != itemInfoVer && ii.obj != null)
@@ -2097,6 +2105,14 @@ namespace FairyGUI
 					RemoveChildToPool(ii.obj);
 					ii.obj = null;
 				}
+			}
+
+			childCount = _children.Count;
+			for (int i = 0; i < childCount; i++)
+			{
+				GObject obj = _virtualItems[newFirstIndex + i].obj;
+				if (_children[i] != obj)
+					SetChildIndex(obj, i);
 			}
 
 			if (deltaSize != 0 || firstItemDeltaSize != 0)
