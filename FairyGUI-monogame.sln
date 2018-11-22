@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI.Windows", "FairyGU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI.DesktopGL", "FairyGUI.DesktopGL\FairyGUI.DesktopGL.csproj", "{43DCB15E-7C9B-412F-A674-652DD0E52805}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI.Desktop.Test", "FairyGUI.Desktop.Test\FairyGUI.Desktop.Test.csproj", "{B89D9AD4-82FA-4779-8E57-C113323A0018}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,14 @@ Global
 		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|Any CPU.Build.0 = Release|Any CPU
 		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|x86.ActiveCfg = Release|Any CPU
 		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|x86.Build.0 = Release|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Debug|x86.Build.0 = Debug|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Release|x86.ActiveCfg = Release|Any CPU
+		{B89D9AD4-82FA-4779-8E57-C113323A0018}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -106,6 +106,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\FairyGUI.fx" />
     <Content Include="Content\Icons\i0.png" />
     <Content Include="Content\Icons\i1.png" />
     <Content Include="Content\Icons\i2.png" />
