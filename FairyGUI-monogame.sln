@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI", "FairyGUI\FairyGUI.csproj", "{D2241CF6-9056-4666-8232-8B3F2085982E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI.Test", "FairyGUI.Test\FairyGUI.Test.csproj", "{C3F139F6-FD77-47D8-86DF-AAB9CDEAEBD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI.Windows", "FairyGUI.Windows\FairyGUI.Windows.csproj", "{1311A111-699F-4326-98D0-D658072A6766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairyGUI.DesktopGL", "FairyGUI.DesktopGL\FairyGUI.DesktopGL.csproj", "{43DCB15E-7C9B-412F-A674-652DD0E52805}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +34,22 @@ Global
 		{C3F139F6-FD77-47D8-86DF-AAB9CDEAEBD3}.Release|Any CPU.ActiveCfg = Release|x86
 		{C3F139F6-FD77-47D8-86DF-AAB9CDEAEBD3}.Release|x86.ActiveCfg = Release|x86
 		{C3F139F6-FD77-47D8-86DF-AAB9CDEAEBD3}.Release|x86.Build.0 = Release|x86
+		{1311A111-699F-4326-98D0-D658072A6766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Debug|x86.Build.0 = Debug|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Release|x86.ActiveCfg = Release|Any CPU
+		{1311A111-699F-4326-98D0-D658072A6766}.Release|x86.Build.0 = Release|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Debug|x86.Build.0 = Debug|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|x86.ActiveCfg = Release|Any CPU
+		{43DCB15E-7C9B-412F-A674-652DD0E52805}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
