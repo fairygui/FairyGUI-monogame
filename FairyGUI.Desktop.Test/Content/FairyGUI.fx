@@ -10,8 +10,6 @@
 
 #endif
 
-sampler TextureSampler : register(s0);
-
 sampler s0;
 
 float4 ColorMatrix0;
