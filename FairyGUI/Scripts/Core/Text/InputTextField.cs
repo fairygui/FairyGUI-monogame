@@ -991,8 +991,12 @@ namespace FairyGUI
 			}
 
 			string str = evt.KeyName;
-			if (str != null && str.Length > 0 && IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
+			if (str != null && str.Length > 0)
 			{
+				if (IMEAdapter.compositionMode == IMEAdapter.CompositionMode.On && 
+					IMEAdapter.compositionString.Length > 0)
+					return;
+
 				if (evt.ctrl)
 					return;
 
@@ -1005,16 +1009,6 @@ namespace FairyGUI
 			{
 				if (IMEAdapter.compositionString.Length > 0)
 					UpdateText();
-				else if (!string.IsNullOrEmpty(str))
-				{
-					if (evt.ctrl)
-						return;
-
-					if (textField.singleLine && str == "\n")
-						return;
-
-					ReplaceSelection(str);
-				}
 			}
 		}
 
