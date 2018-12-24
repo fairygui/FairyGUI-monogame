@@ -1,7 +1,7 @@
 
 #----------------------------- Global Properties ----------------------------#
 
-/outputDir:..\bin\Debug
+/outputDir:../bin/$(Platform)/x86/Debug/Content
 /intermediateDir:obj/$(Platform)
 /platform:DesktopGL
 /config:
@@ -18,4 +18,3 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:FairyGUI.fx
-

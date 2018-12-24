@@ -1,11 +1,11 @@
 
 #----------------------------- Global Properties ----------------------------#
 
-/outputDir:bin/$(Platform)/Content
+/outputDir:../bin/$(Platform)/x86/Debug/Content
 /intermediateDir:obj/$(Platform)
 /platform:Windows
 /config:
-/profile:HiDef
+/profile:Reach
 /compress:False
 
 #-------------------------------- References --------------------------------#
@@ -18,4 +18,3 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:FairyGUI.fx
-

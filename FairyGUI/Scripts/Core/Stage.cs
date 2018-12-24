@@ -6,6 +6,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
 
+#if Windows
+using static FairyGUI.Scripts.Core.Text.IMM;
+#endif
+
 namespace FairyGUI
 {
 	/// <summary>
@@ -34,7 +38,6 @@ namespace FairyGUI
 		Dictionary<Keys, float> _lastKeyDownTime;
 		Keys[] _lastKeys;
 		int _lastScrollWheelValue;
-		public static IMEHandler Handler;
 
 		public static EventCallback0 beforeUpdate;
 		public static EventCallback0 afterUpdate;
@@ -64,6 +67,10 @@ namespace FairyGUI
 			get { return false; }
 		}
 
+#if Windows || DesktopGL
+		public static IMEHandler handler;
+#endif
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -72,10 +79,11 @@ namespace FairyGUI
 		{
 			_inst = this;
 			Stage.game = game;
-			Handler = new IMEHandler(game);
-			Handler.onResultReceived += HandlerOnOnResultReceived;
-			Handler.onCandidatesReceived += HandlerOnOnCandidatesReceived;
-			Handler.onCompositionReceived += HandlerOnOnCompositionReceived;
+
+#if Windows || DesktopGL
+			handler = new IMEHandler(game);
+			handler.onResultReceived += Handler_onResultReceived;
+#endif
 
 			soundVolume = 1;
 
@@ -92,52 +100,43 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-		private void HandlerOnOnCompositionReceived(object sender, EventArgs e)
+#if Windows || DesktopGL
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void Handler_onResultReceived(object sender, IMEResultEventArgs e)
 		{
-			if (_focused is InputTextField)
-				((InputTextField) _focused).CanInsert = false;
-		}
+			if (IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
+				return;
 
-		private void HandlerOnOnCandidatesReceived(object sender, EventArgs e)
-		{
-			if (_focused is InputTextField)
-				((InputTextField)_focused).CanInsert = false;
-		}
-
-
-		private void HandlerOnOnResultReceived(object sender, IMEResultEventArgs e)
-		{
+			var content = IMEAdapter.compositionString;
 			switch ((int)e.result)
 			{
-				case 8:
-					break;
 				case 27:
 				case 13:
+					IMEAdapter.compositionString = "";
 					break;
 				default:
-					if (_focused is InputTextField)
-					{
-						var field = (InputTextField) _focused;
-
-						if (!CheckStringChineseReg(e.result.ToString()))
-						{
-							field.CanInsert = true;
-							break;
-						}
-
-						field.ReplaceSelection(e.result.ToString());
-					}
-
+					IMEAdapter.compositionString += e.result;
 					break;
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
 		private bool CheckStringChineseReg(string t)
 		{
 			bool res = Regex.IsMatch(t, @"[\u4e00-\u9fbb]+$");
 
 			return res;
 		}
+#endif
+
 
 		/// <summary>
 		/// 
@@ -543,7 +542,7 @@ namespace FairyGUI
 			InputTextField textField = (InputTextField)_focused;
 			if (!textField.editable)
 				return;
-			
+
 			textField.CheckComposition();
 		}
 

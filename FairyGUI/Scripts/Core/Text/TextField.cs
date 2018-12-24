@@ -6,8 +6,11 @@ using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
+
+#if Windows || DesktopGL
 using Region = System.Drawing.Region;
 using Rectangle = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI
 {

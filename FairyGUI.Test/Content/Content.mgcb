@@ -3,7 +3,7 @@
 
 /outputDir:../bin/$(Platform)/x86/Debug/Content
 /intermediateDir:obj/$(Platform)
-/platform:Windows
+/platform:DesktopGL
 /config:
 /profile:Reach
 /compress:False
@@ -12,12 +12,6 @@
 
 
 #---------------------------------- Content ---------------------------------#
-
-#begin FairyGUI.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:FairyGUI.fx
 
 #begin Icons/i0.png
 /importer:TextureImporter

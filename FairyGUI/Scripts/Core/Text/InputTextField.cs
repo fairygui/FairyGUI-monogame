@@ -1,15 +1,14 @@
 ﻿using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Windows.Forms;
-using FairyGUI.Scripts.Core.Text;
-using HtmlElement = FairyGUI.Utils.HtmlElement;
-using Keys = Microsoft.Xna.Framework.Input.Keys;
+
+#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI
 {
@@ -72,8 +71,6 @@ namespace FairyGUI
 		const int GUTTER_X = 2;
 		const int GUTTER_Y = 2;
 
-		public bool CanInsert = true;
-
 		public InputTextField()
 		{
 			onFocusIn = new EventListener(this, "onFocusIn");
@@ -98,7 +95,7 @@ namespace FairyGUI
 			onTouchBegin.AddCapture(__touchBegin);
 			onTouchMove.AddCapture(__touchMove);
 		}
-		
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -274,7 +271,14 @@ namespace FairyGUI
 
 				_caretPosition += value.Length;
 			}
-			buffer.Append(_text, t1 + _composing, _text.Length - t1 - _composing);
+			if (IMEAdapter.compositionString.Length > 0)
+			{
+				if (textField.text.Length - t1 > _composing)
+					buffer.Append(_text, t1 + _composing, textField.text.Length - t1 - _composing);
+			}
+			else
+				buffer.Append(_text, t1 + _composing, _text.Length - t1 - _composing);
+			
 			if (maxLength > 0 && buffer.Length > maxLength)
 				buffer.Length = maxLength;
 
@@ -347,20 +351,23 @@ namespace FairyGUI
 				textField.htmlText = _decodedPromptText;
 			else if (_displayAsPassword)
 				textField.text = EncodePasswordText(_text);
-			else if (IMEAdapter.CompositionString.Length > 0)
+			else if (IMEAdapter.compositionString.Length > 0 && _caretPosition == 0)
 			{
 				StringBuilder buffer = new StringBuilder();
 				buffer.Append(_text, 0, _caretPosition);
-				buffer.Append(IMEAdapter.CompositionString);
-				buffer.Append(_text, _caretPosition + composing, _text.Length - _caretPosition - composing);
+				buffer.Append(IMEAdapter.compositionString);
+				buffer.Append(_text, _caretPosition + composing, textField.text.Length - _caretPosition - composing);
 
-				_composing = IMEAdapter.CompositionString.Length;
+				_composing = IMEAdapter.compositionString.Length;
 
 				string newText = buffer.ToString();
 				textField.text = newText;
 			}
 			else
-				textField.text = _text;
+			{
+				if (_caretPosition == _text.Length)
+					textField.text = _text;
+			}
 		}
 
 		string EncodePasswordText(string value)
@@ -418,7 +425,7 @@ namespace FairyGUI
 		{
 			TextField.CharPosition cp;
 			if (_editing)
-				cp = GetCharPosition(_caretPosition + IMEAdapter.CompositionString.Length);
+				cp = GetCharPosition(_caretPosition + IMEAdapter.compositionString.Length);
 			else
 				cp = GetCharPosition(_caretPosition);
 
@@ -506,7 +513,7 @@ namespace FairyGUI
 			}
 
 			TextField.CharPosition start;
-			if (_editing && IMEAdapter.CompositionString.Length > 0)
+			if (_editing && IMEAdapter.compositionString.Length > 0)
 			{
 				if (_selectionStart < _caretPosition)
 				{
@@ -514,7 +521,7 @@ namespace FairyGUI
 					start = GetCharPosition(_selectionStart);
 				}
 				else
-					start = GetCharPosition(_selectionStart + IMEAdapter.CompositionString.Length);
+					start = GetCharPosition(_selectionStart + IMEAdapter.compositionString.Length);
 			}
 			else
 				start = GetCharPosition(_selectionStart);
@@ -691,13 +698,10 @@ namespace FairyGUI
 
 		void DoCopy(string value)
 		{
-			Clipboard.SetDataObject(value);
 		}
 
 		void DoPaste()
 		{
-			IDataObject iData = Clipboard.GetDataObject();
-			if (iData != null) ReplaceSelection((String)iData.GetData(DataFormats.Text));
 		}
 
 		static void CreateCaret()
@@ -800,9 +804,13 @@ namespace FairyGUI
 			{
 				case Keys.Back:
 					{
+						if (textField.text.Length > 0)
+							IMEAdapter.compositionString = textField.text.Remove(textField.text.Length - 1, 1);
+
 						context.PreventDefault();
 						if (_selectionStart == _caretPosition && _caretPosition > 0)
 							_selectionStart = _caretPosition - 1;
+
 						ReplaceSelection(null);
 						break;
 					}
@@ -826,7 +834,6 @@ namespace FairyGUI
 							TextField.CharPosition cp = GetCharPosition(_caretPosition - 1);
 							AdjustCaret(cp, !evt.shift);
 						}
-
 						break;
 					}
 
@@ -840,7 +847,6 @@ namespace FairyGUI
 							TextField.CharPosition cp = GetCharPosition(_caretPosition + 1);
 							AdjustCaret(cp, !evt.shift);
 						}
-
 						break;
 					}
 
@@ -874,7 +880,6 @@ namespace FairyGUI
 							TextField.LineInfo line = textField.lines[cp.lineIndex + 1];
 							cp = GetCharPosition(new Vector2(_caret.x, line.y + textField.y));
 						}
-
 						AdjustCaret(cp, !evt.shift);
 						break;
 					}
@@ -931,7 +936,6 @@ namespace FairyGUI
 							_selectionStart = 0;
 							AdjustCaret(GetCharPosition(int.MaxValue));
 						}
-
 						break;
 					}
 
@@ -945,7 +949,6 @@ namespace FairyGUI
 							if (!string.IsNullOrEmpty(s))
 								DoCopy(s);
 						}
-
 						break;
 					}
 
@@ -957,7 +960,6 @@ namespace FairyGUI
 							context.PreventDefault();
 							DoPaste();
 						}
-
 						break;
 					}
 
@@ -974,7 +976,6 @@ namespace FairyGUI
 								ReplaceSelection(null);
 							}
 						}
-
 						break;
 					}
 
@@ -985,13 +986,12 @@ namespace FairyGUI
 							onSubmit.Call();
 							return;
 						}
-
 						break;
 					}
 			}
 
 			string str = evt.KeyName;
-			if (!string.IsNullOrEmpty(str))
+			if (str != null && str.Length > 0 && IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
 			{
 				if (evt.ctrl)
 					return;
@@ -999,21 +999,18 @@ namespace FairyGUI
 				if (textField.singleLine && str == "\n")
 					return;
 
-				if (!CanInsert)
-					return;
-
 				ReplaceSelection(str);
 			}
 			else
 			{
-				if (IMEAdapter.CompositionString.Length > 0)
+				if (IMEAdapter.compositionString.Length > 0)
 					UpdateText();
 			}
 		}
 
 		internal void CheckComposition()
 		{
-			if (_composing != 0 && IMEAdapter.CompositionString.Length == 0)
+			if (_composing != 0 && IMEAdapter.compositionString.Length == 0)
 				UpdateText();
 		}
 	}
