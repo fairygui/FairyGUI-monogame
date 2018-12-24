@@ -112,10 +112,8 @@
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <MonoGameContentReference Include="Content\Content.mgcb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </MonoGameContentReference>
     <None Include="app.manifest" />
+    <MonoGameContentReference Include="Content\Content.DesktopGL.mgcb" />
     <None Include="Content\UI\Bag.fui" />
     <None Include="Content\UI\Basics.fui" />
     <None Include="Content\UI\Cooldown.fui" />

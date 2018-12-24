@@ -1005,6 +1005,16 @@ namespace FairyGUI
 			{
 				if (IMEAdapter.compositionString.Length > 0)
 					UpdateText();
+				else if (!string.IsNullOrEmpty(str))
+				{
+					if (evt.ctrl)
+						return;
+
+					if (textField.singleLine && str == "\n")
+						return;
+
+					ReplaceSelection(str);
+				}
 			}
 		}
 
