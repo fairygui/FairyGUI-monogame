@@ -991,12 +991,8 @@ namespace FairyGUI
 			}
 
 			string str = evt.KeyName;
-			if (str != null && str.Length > 0)
-			{
-				if (IMEAdapter.compositionMode == IMEAdapter.CompositionMode.On && 
-					IMEAdapter.compositionString.Length > 0)
-					return;
-
+			if (!string.IsNullOrEmpty(str) && IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
+			{ 
 				if (evt.ctrl)
 					return;
 

@@ -1,5 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 
+#if DesktopGL
+using FairyGUI.SDL;
+#endif
+
 namespace FairyGUI
 {
 	/// <summary>
@@ -51,6 +55,11 @@ namespace FairyGUI
 					Stage.handler.Enabled = true;
 				else if (compositionMode == CompositionMode.Off)
 					Stage.handler.Enabled = false;
+#elif DesktopGL
+				if (compositionMode == CompositionMode.On)
+					SDLNative.SDL_StartTextInput();
+				else if (compositionMode == CompositionMode.Off)
+					SDLNative.SDL_StopTextInput();
 #endif
 			}
 		}
