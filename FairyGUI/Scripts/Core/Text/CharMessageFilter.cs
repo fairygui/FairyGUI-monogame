@@ -1,12 +1,15 @@
-﻿using System;
+﻿#if Windows
+using System;
 using System.Runtime.InteropServices;
 
-#if Windows || DesktopGL
+
 using System.Windows.Forms;
-#endif
 
 namespace FairyGUI.Scripts.Core.Text
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class CharMessageFilter
 	{
 		public static bool Added { get; private set; }
@@ -25,7 +28,7 @@ namespace FairyGUI.Scripts.Core.Text
 			{
 				switch (m.Msg)
 				{
-#if Windows
+
 					case IMM.KeyDown:
 
 						IntPtr intPtr = Marshal.AllocHGlobal(Marshal.SizeOf(m));
@@ -33,7 +36,6 @@ namespace FairyGUI.Scripts.Core.Text
 						IMM.TranslateMessage(intPtr);
 
 						return false;
-#endif
 					case 0x020A:
 						// Mouse wheel is not correct if the IME helper is used, thus it is needed to grab the value here.
 						MouseWheel += (int)(short)((uint)(int)m.WParam >> 16);
@@ -44,3 +46,4 @@ namespace FairyGUI.Scripts.Core.Text
 		}
 	}
 }
+#endif

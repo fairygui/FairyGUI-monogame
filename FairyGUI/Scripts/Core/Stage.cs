@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using FairyGUI.Scripts.Core.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
+
+#if Windows
+using FairyGUI.Scripts.Core.Text;
+#endif
 
 namespace FairyGUI
 {

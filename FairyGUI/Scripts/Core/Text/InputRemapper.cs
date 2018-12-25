@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿#if Windows
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace FairyGUI.Scripts.Core.Text
@@ -44,3 +45,4 @@ namespace FairyGUI.Scripts.Core.Text
 		}
 	}
 }
+#endif
