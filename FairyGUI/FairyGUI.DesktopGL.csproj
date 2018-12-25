@@ -70,12 +70,10 @@
     <Compile Include="Scripts\Core\Stats.cs" />
     <Compile Include="Scripts\Core\Text\BaseFont.cs" />
     <Compile Include="Scripts\Core\Text\BitmapFont.cs" />
-    <Compile Include="Scripts\Core\Text\CharMessageFilter.cs" />
     <Compile Include="Scripts\Core\Text\DynamicFont.cs" />
     <Compile Include="Scripts\Core\Text\Emoji.cs" />
     <Compile Include="Scripts\Core\Text\FontManager.cs" />
     <Compile Include="Scripts\Core\Text\IMEAdapter.cs" />
-    <Compile Include="Scripts\Core\Text\InputRemapper.cs" />
     <Compile Include="Scripts\Core\Text\InputTextField.cs" />
     <Compile Include="Scripts\Core\Text\SelectionShape.cs" />
     <Compile Include="Scripts\Core\Text\TextField.cs" />
