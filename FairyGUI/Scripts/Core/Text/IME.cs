@@ -1,23 +1,49 @@
-﻿#if Windows || DesktopGL
+﻿#if Windows
 using System;
 using Microsoft.Xna.Framework;
 
 namespace FairyGUI.Scripts.Core.Text
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public class IMEHandler : IDisposable
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public IMENativeWindow _nativeWnd;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="game"></param>
+		/// <param name="showDefaultImeWindow"></param>
 		public IMEHandler(Game game, bool showDefaultImeWindow = false)
 		{
 			this.GameInstance = game;
 			Input = new InputRemapper(game);
 			_nativeWnd = new IMENativeWindow(game.Window.Handle, showDefaultImeWindow);
-			_nativeWnd.onCandidatesReceived += (s, e) => { onCandidatesReceived?.Invoke(s, e); };
-			_nativeWnd.onCompositionReceived += (s, e) => { onCompositionReceived?.Invoke(s, e); };
-			_nativeWnd.onResultReceived += (s, e) => { onResultReceived?.Invoke(s, e); };
-			_nativeWnd.onStartCompositionReceived += (s, e) => { onStartCompositionReceived?.Invoke(s, e); };
-			_nativeWnd.onEndCompositionReceived += (s, e) => { onEndCompositionReceived?.Invoke(s, e); };
+			_nativeWnd.onCandidatesReceived += (s, e) =>
+			{
+				if (onCandidatesReceived != null) onCandidatesReceived.Invoke(s, e);
+			};
+			_nativeWnd.onCompositionReceived += (s, e) =>
+			{
+				if (onCompositionReceived != null) onCompositionReceived.Invoke(s, e);
+			};
+			_nativeWnd.onResultReceived += (s, e) =>
+			{
+				if (onResultReceived != null) onResultReceived.Invoke(s, e);
+			};
+			_nativeWnd.onStartCompositionReceived += (s, e) =>
+			{
+				if (onStartCompositionReceived != null) onStartCompositionReceived.Invoke(s, e);
+			};
+			_nativeWnd.onEndCompositionReceived += (s, e) =>
+			{
+				if (onEndCompositionReceived != null) onEndCompositionReceived.Invoke(s, e);
+			};
 			game.Exiting += (o, e) => this.Dispose();
 		}
 
@@ -31,8 +57,14 @@ namespace FairyGUI.Scripts.Core.Text
 		/// </summary>
 		public event EventHandler onCandidatesReceived;
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public event EventHandler onStartCompositionReceived;
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public event EventHandler<IMEResultEventArgs> onEndCompositionReceived;
 
 		/// <summary>
@@ -153,6 +185,9 @@ namespace FairyGUI.Scripts.Core.Text
 			return _nativeWnd.GetCompositionReadAttr(index);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public void OpenIme()
 		{
 			_nativeWnd.OpenIME();

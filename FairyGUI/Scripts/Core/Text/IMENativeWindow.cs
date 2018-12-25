@@ -1,4 +1,4 @@
-﻿#if Windows || DesktopGL
+﻿#if Windows
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -360,14 +360,14 @@ namespace FairyGUI.Scripts.Core.Text
 		{
 			CandidatesSelection = CandidatesPageStart = CandidatesPageSize = 0;
 			Candidates = new string[0];
-			onCandidatesReceived?.Invoke(this, EventArgs.Empty);
+			if (onCandidatesReceived != null) onCandidatesReceived.Invoke(this, EventArgs.Empty);
 		}
 
 		private void IMEStartComposion(int lParam)
 		{
 			ClearComposition();
 			ClearResult();
-			onStartCompositionReceived?.Invoke(this, EventArgs.Empty);
+			if (onStartCompositionReceived != null) onStartCompositionReceived.Invoke(this, EventArgs.Empty);
 		}
 
 		private void IMEComposition(int lParam)
@@ -380,7 +380,7 @@ namespace FairyGUI.Scripts.Core.Text
 				_compreadclause.Update();
 				_compreadattr.Update();
 				_compcurpos.Update();
-				onCompositionReceived?.Invoke(this, EventArgs.Empty);
+				if (onCompositionReceived != null) onCompositionReceived.Invoke(this, EventArgs.Empty);
 			}
 		}
 
@@ -394,17 +394,18 @@ namespace FairyGUI.Scripts.Core.Text
 				_resreadclause.Update();
 			}
 
-			onEndCompositionReceived?.Invoke(this, new IMEResultEventArgs((char)lParam));
+			if (onEndCompositionReceived != null)
+				onEndCompositionReceived.Invoke(this, new IMEResultEventArgs((char) lParam));
 		}
 
 		private void CharEvent(int wParam)
 		{
-			onResultReceived?.Invoke(this, new IMEResultEventArgs((char)wParam));
+			if (onResultReceived != null) onResultReceived.Invoke(this, new IMEResultEventArgs((char) wParam));
 		}
 
 		private void KeyDownEvent(int wParam)
 		{
-			onKeyDownReceived?.Invoke(this, new IMEResultEventArgs((char)wParam));
+			if (onKeyDownReceived != null) onKeyDownReceived.Invoke(this, new IMEResultEventArgs((char) wParam));
 		}
 
 		private bool ImeGetOpenStatus(IntPtr lParam)

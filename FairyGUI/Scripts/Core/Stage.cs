@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using FairyGUI.Scripts.Core.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
-
-#if Windows
-using static FairyGUI.Scripts.Core.Text.IMM;
-#endif
 
 namespace FairyGUI
 {
@@ -39,7 +34,13 @@ namespace FairyGUI
 		Keys[] _lastKeys;
 		int _lastScrollWheelValue;
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static EventCallback0 beforeUpdate;
+		/// <summary>
+		/// 
+		/// </summary>
 		public static EventCallback0 afterUpdate;
 
 		static Stage _inst;
@@ -56,35 +57,34 @@ namespace FairyGUI
 		/// </summary>
 		public static bool isTouchOnUI
 		{
-			get
-			{
-				return _inst != null && _inst.touchTarget != null;
-			}
+			get { return _inst != null && _inst.touchTarget != null; }
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static bool touchScreen
 		{
 			get { return false; }
 		}
 
-#if Windows || DesktopGL
+#if Windows
 		public static IMEHandler handler;
 #endif
+
 
 		/// <summary>
 		/// 
 		/// </summary>
 		public Stage(Game game)
-			: base()
 		{
 			_inst = this;
 			Stage.game = game;
 
-#if Windows || DesktopGL
+#if Windows
 			handler = new IMEHandler(game);
 			handler.onResultReceived += Handler_onResultReceived;
 #endif
-
 			soundVolume = 1;
 
 			_batch = new FairyBatch();
@@ -100,7 +100,7 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-#if Windows || DesktopGL
+#if Windows
 		/// <summary>
 		/// 
 		/// </summary>
@@ -123,18 +123,6 @@ namespace FairyGUI
 					break;
 			}
 		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="t"></param>
-		/// <returns></returns>
-		private bool CheckStringChineseReg(string t)
-		{
-			bool res = Regex.IsMatch(t, @"[\u4e00-\u9fbb]+$");
-
-			return res;
-		}
 #endif
 
 
@@ -153,6 +141,9 @@ namespace FairyGUI
 			AddChild(GRoot._inst.displayObject);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public override void Dispose()
 		{
 			_batch.Dispose();
@@ -160,19 +151,56 @@ namespace FairyGUI
 			base.Dispose();
 		}
 
-		public int DrawOrder { get { return 0; } }
-		public bool Visible { get { return true; } }
+		/// <summary>
+		/// 绘制顺序
+		/// </summary>
+		public int DrawOrder
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		/// <summary>
+		/// 可见性
+		/// </summary>
+		public bool Visible
+		{
+			get
+			{
+				return true;
+			}
+		}
 
 #pragma warning disable 0067
+		/// <summary>
+		/// 
+		/// </summary>
 		public event EventHandler<EventArgs> DrawOrderChanged;
+		/// <summary>
+		/// 
+		/// </summary>
 		public event EventHandler<EventArgs> VisibleChanged;
 #pragma warning restore 0067
 
+		/// <summary>
+		/// 是否启用
+		/// </summary>
 		public bool Enabled { get { return true; } }
+		/// <summary>
+		/// 更新顺序
+		/// </summary>
 		public int UpdateOrder { get { return 0; } }
 
 #pragma warning disable 0067
+		/// <summary>
+		/// 
+		/// </summary>
 		public event EventHandler<EventArgs> EnabledChanged;
+		/// <summary>
+		/// 
+		/// </summary>
 		public event EventHandler<EventArgs> UpdateOrderChanged;
 #pragma warning restore 0067
 
@@ -213,17 +241,19 @@ namespace FairyGUI
 
 				if (oldFocus != null)
 				{
-					if (oldFocus is InputTextField)
-						((InputTextField)oldFocus).onFocusOut.Call();
+					InputTextField field = oldFocus as InputTextField;
+					if (field != null)
+						field.onFocusOut.Call();
 
 					oldFocus.onRemovedFromStage.RemoveCapture(_focusRemovedDelegate);
 				}
 
 				if (_focused != null)
 				{
-					if (_focused is InputTextField)
+					InputTextField field = _focused as InputTextField;
+					if (field != null)
 					{
-						_lastInput = (InputTextField)_focused;
+						_lastInput = field;
 						_lastInput.onFocusIn.Call();
 					}
 
@@ -329,7 +359,7 @@ namespace FairyGUI
 			_touchTarget = HitTest(_touchPosition, true);
 			_touchInfo.target = _touchTarget;
 
-			if (_touchInfo.x != _touchPosition.X || _touchInfo.y != _touchPosition.Y)
+			if (Math.Abs(_touchInfo.x - _touchPosition.X) > 0 || Math.Abs(_touchInfo.y - _touchPosition.Y) > 0)
 			{
 				_touchInfo.x = _touchPosition.X;
 				_touchInfo.y = _touchPosition.Y;
@@ -632,12 +662,21 @@ namespace FairyGUI
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="touchId"></param>
+		/// <param name="target"></param>
 		public void AddTouchMonitor(int touchId, EventDispatcher target)
 		{
 			if (_touchInfo.touchMonitors.IndexOf(target) == -1)
 				_touchInfo.touchMonitors.Add(target);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="target"></param>
 		public void RemoveTouchMonitor(EventDispatcher target)
 		{
 			int i = _touchInfo.touchMonitors.IndexOf(target);
@@ -645,6 +684,10 @@ namespace FairyGUI
 				_touchInfo.touchMonitors[i] = null;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
 		public void Update(GameTime gameTime)
 		{
 			Timers.inst.Update(gameTime);
@@ -675,6 +718,10 @@ namespace FairyGUI
 			afterUpdate = null;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="gameTime"></param>
 		public void Draw(GameTime gameTime)
 		{
 			_batch.Begin();

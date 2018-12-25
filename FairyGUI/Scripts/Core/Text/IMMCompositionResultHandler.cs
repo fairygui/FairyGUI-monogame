@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if Windows
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -71,7 +72,7 @@ namespace FairyGUI.Scripts.Core.Text
 
 		internal override void Update()
 		{
-#if Windows || DesktopGL
+
 			Length = IMM.ImmGetCompositionString(IMEHandle, Flag, IntPtr.Zero, 0);
 			IntPtr pointer = Marshal.AllocHGlobal(Length);
 			try
@@ -84,10 +85,8 @@ namespace FairyGUI.Scripts.Core.Text
 			{
 				Marshal.FreeHGlobal(pointer);
 			}
-#endif
 		}
 	}
-
 	internal class IMMCompositionInt : IMMCompositionResultHandler
 	{
 		public int Value { get; private set; }
@@ -101,9 +100,9 @@ namespace FairyGUI.Scripts.Core.Text
 
 		internal override void Update()
 		{
-#if Windows || DesktopGL
+
 			Value = IMM.ImmGetCompositionString(IMEHandle, Flag, IntPtr.Zero, 0);
-#endif
 		}
 	}
 }
+#endif
