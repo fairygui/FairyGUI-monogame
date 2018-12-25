@@ -20,7 +20,11 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
+#if DesktopGL
+[assembly: Guid("B92B9502-89AD-49A1-8327-7167A9994BAA")]
+#elif Windows
 [assembly: Guid("d2241cf6-9056-4666-8232-8b3f2085982e")]
+#endif
 
 // 程序集的版本信息由下列四个值组成: 
 //

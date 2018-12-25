@@ -84,6 +84,8 @@ namespace FairyGUI
 #if Windows
 			handler = new IMEHandler(game);
 			handler.onResultReceived += Handler_onResultReceived;
+#elif DesktopGL
+			game.Window.TextInput += WindowOnTextInput;
 #endif
 			soundVolume = 1;
 
@@ -99,6 +101,13 @@ namespace FairyGUI
 
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
+
+#if DesktopGL
+		private void WindowOnTextInput(object sender, TextInputEventArgs e)
+		{
+			IMEAdapter.compositionString += e.Character;
+		}
+#endif
 
 #if Windows
 		/// <summary>
