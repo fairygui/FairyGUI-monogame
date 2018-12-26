@@ -2,7 +2,9 @@
 using System.Text;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
+#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI.Utils
 {
@@ -42,11 +44,13 @@ namespace FairyGUI.Utils
 			return new Color(((value >> 16) & 0xFF), ((value >> 8) & 0xFF), (value & 0xFF), ((value >> 24) & 0xFF));
 		}
 
+#if Windows || DesktopGL
 		public static System.Drawing.Color ToSystemColor(ref Color color)
 		{
 			return System.Drawing.Color.FromArgb((int)(color.A), (int)(color.R), (int)(color.G),
 				(int)(color.B));
 		}
+#endif
 
 		public static int CharToHex(char c)
 		{

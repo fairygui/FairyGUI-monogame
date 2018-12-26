@@ -6,7 +6,10 @@ using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+
+#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI
 {

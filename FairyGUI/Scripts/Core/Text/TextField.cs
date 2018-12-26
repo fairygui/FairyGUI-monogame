@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
+
+#if Windows || DesktopGL
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using Region = System.Drawing.Region;
 using Rectangle = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI
 {

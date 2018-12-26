@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+#if Windows || DesktopGL
 using RectangleF = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI
 {

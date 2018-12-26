@@ -2,40 +2,71 @@
 
 namespace FairyGUI
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public static class IMEAdapter
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public enum CompositionMode
 		{
-			//Auto = 0, // 没有Auto属性
+#if !Windows
+			/// <summary>
+			/// 
+			/// </summary>
+			Auto = 0,
+#endif
+			/// <summary>
+			/// 
+			/// </summary>
 			On = 1,
+			/// <summary>
+			/// 
+			/// </summary>
 			Off = 2
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static Vector2 compositionCursorPos
 		{
-			set { }
+			get; set;
 		}
 
-	    private static CompositionMode _compositionMode;
-
+		private static CompositionMode _compositionMode;
+		/// <summary>
+		/// 
+		/// </summary>
 		public static CompositionMode compositionMode
 		{
-			set
-		    {
-		        if (value == CompositionMode.On)
-		            Stage.Handler.Enabled = true;
-                else if (value == CompositionMode.Off)
-		            Stage.Handler.Enabled = false;
-
-		        _compositionMode = value;
-
-		    }
 			get { return _compositionMode; }
+			set
+			{
+				_compositionMode = value;
+#if Windows
+				if (compositionMode == CompositionMode.On)
+					Stage.handler.Enabled = true;
+				else if (compositionMode == CompositionMode.Off)
+					Stage.handler.Enabled = false;
+#endif
+			}
 		}
 
-		public static string CompositionString
+		/// <summary>
+		/// 
+		/// </summary>
+		public static string compositionString
 		{
-			get { return string.Empty; }
+			get; set;
+		}
+
+
+		static IMEAdapter()
+		{
+			compositionString = string.Empty;
 		}
 	}
 }
