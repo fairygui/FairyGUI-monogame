@@ -1,13 +1,17 @@
 ﻿using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using HtmlElement = FairyGUI.Utils.HtmlElement;
+using Keys = Microsoft.Xna.Framework.Input.Keys;
 #if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
+#endif
+
+#if Windows
+using System.Windows.Forms;
 #endif
 
 namespace FairyGUI
@@ -51,6 +55,10 @@ namespace FairyGUI
 		/// 
 		/// </summary>
 		public bool hideInput { get; set; }
+
+#if DesktopGL
+		public object CopyObject { get; set; }
+#endif
 
 		string _text;
 		string _restrict;
@@ -262,7 +270,12 @@ namespace FairyGUI
 			}
 
 			StringBuilder buffer = new StringBuilder();
-			buffer.Append(_text, 0, t0);
+
+			if (!string.IsNullOrEmpty(_text))
+				buffer.Append(_text, 0, t0);
+			else if(!string.IsNullOrEmpty(textField.text))
+				buffer.Append(textField.text, 0, t0);
+
 			if (!string.IsNullOrEmpty(value))
 			{
 				value = ToolSet.FormatCRLF(value);
@@ -271,7 +284,7 @@ namespace FairyGUI
 
 				_caretPosition += value.Length;
 			}
-			if (IMEAdapter.compositionString.Length > 0)
+			if (textField.text.Length > 0)
 			{
 				if (textField.text.Length - t1 > _composing)
 					buffer.Append(_text, t1 + _composing, textField.text.Length - t1 - _composing);
@@ -407,9 +420,14 @@ namespace FairyGUI
 				return string.Empty;
 
 			if (_selectionStart < _caretPosition)
+			{
+				if (IMEAdapter.compositionString.Length > 0)
+					return textField.text.Substring(_selectionStart, _caretPosition);
+
 				return _text.Substring(_selectionStart, _caretPosition);
-			else
-				return _text.Substring(_caretPosition, _selectionStart - _caretPosition);
+			}
+
+			return _text.Substring(_caretPosition, _selectionStart - _caretPosition);
 		}
 
 		void AdjustCaret(TextField.CharPosition cp, bool moveSelectionHeader = false)
@@ -698,10 +716,23 @@ namespace FairyGUI
 
 		void DoCopy(string value)
 		{
+#if Windows
+			Clipboard.SetDataObject(value);
+#elif DesktopGL
+			CopyObject = value;
+#endif
 		}
 
 		void DoPaste()
 		{
+#if Windows
+			IDataObject iData = Clipboard.GetDataObject();
+			if (iData != null) ReplaceSelection((String)iData.GetData(DataFormats.Text));
+#elif DesktopGL
+			if (CopyObject != null)
+				ReplaceSelection((string) CopyObject);
+#endif
+
 		}
 
 		static void CreateCaret()
@@ -990,15 +1021,15 @@ namespace FairyGUI
 					}
 			}
 
+			if (evt.ctrl)
+				return;
+
 			string str = evt.KeyName;
 			if (!string.IsNullOrEmpty(str) && IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
 			{ 
-				if (evt.ctrl)
-					return;
-
 				if (textField.singleLine && str == "\n")
 					return;
-
+				
 				ReplaceSelection(str);
 			}
 			else

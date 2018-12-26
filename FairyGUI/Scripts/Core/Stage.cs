@@ -108,6 +108,9 @@ namespace FairyGUI
 #if DesktopGL
 		private void WindowOnTextInput(object sender, TextInputEventArgs e)
 		{
+			if (e.Character == '\b' || e.Character == '\r')
+				return;
+
 			IMEAdapter.compositionString += e.Character;
 		}
 #endif

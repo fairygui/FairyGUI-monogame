@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+
+#if Windows || DesktopGL
 using System.Drawing;
+#endif
 
 namespace FairyGUI
 {
