@@ -838,6 +838,8 @@ namespace FairyGUI
 		{
 			UpdateEvent();
 
+			if (Math.Abs(x - downX) > 50 || Math.Abs(y - downY) > 50) clickCancelled = true;
+
 			if (touchMonitors.Count > 0)
 			{
 				int len = touchMonitors.Count;
