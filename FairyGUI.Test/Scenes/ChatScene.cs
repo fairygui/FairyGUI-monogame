@@ -101,10 +101,7 @@ namespace FairyGUI.Test.Scenes
 			item.icon = UIPackage.GetItemURL("Emoji", msg.senderIcon);
 
 			//Recaculate the text width
-			GRichTextField tf = item.GetChild("msg").asRichTextField;
-			tf.width = tf.initWidth;
-			tf.text = EmojiParser.inst.Parse(msg.msg);
-			tf.width = tf.textWidth;
+			item.GetChild("msg").text = EmojiParser.inst.Parse(msg.msg);
 		}
 
 		void __clickSendBtn(EventContext context)
