@@ -41,70 +41,6 @@ namespace FairyGUI
 		/// </summary>
 		public uint id;
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onClick { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onRightClick { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onTouchBegin { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onTouchMove { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onTouchEnd { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onRollOver { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onRollOut { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onMouseWheel { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onAddedToStage { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onRemovedFromStage { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onKeyDown { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onClickLink { get; private set; }
-
-		protected Vector3 _rotation;
-		protected Vector3 _position;
-		protected Vector2 _scale;
-
 		bool _visible;
 		bool _touchable;
 		Vector2 _pivot;
@@ -114,6 +50,23 @@ namespace FairyGUI
 		bool _grayed;
 		protected IFilter _filter;
 		protected BlendMode _blendMode;
+
+		EventListener _onClick;
+		EventListener _onRightClick;
+		EventListener _onTouchBegin;
+		EventListener _onTouchMove;
+		EventListener _onTouchEnd;
+		EventListener _onRollOver;
+		EventListener _onRollOut;
+		EventListener _onMouseWheel;
+		EventListener _onAddedToStage;
+		EventListener _onRemovedFromStage;
+		EventListener _onKeyDown;
+		EventListener _onClickLink;
+
+		protected Vector3 _rotation;
+		protected Vector3 _position;
+		protected Vector2 _scale;
 
 		protected int _paintingMode; //1-滤镜，2-blendMode，4-transformMatrix, 8-cacheAsBitmap
 		protected Margin _paintingMargin;
@@ -146,19 +99,102 @@ namespace FairyGUI
 			_matrixVersion = _parentMatrixVersion = 0;
 			_localToWorldMatrix = Matrix.Identity;
 			_outlineChanged = true;
+		}
 
-			onClick = new EventListener(this, "onClick");
-			onRightClick = new EventListener(this, "onRightClick");
-			onTouchBegin = new EventListener(this, "onTouchBegin");
-			onTouchMove = new EventListener(this, "onTouchMove");
-			onTouchEnd = new EventListener(this, "onTouchEnd");
-			onRollOver = new EventListener(this, "onRollOver");
-			onRollOut = new EventListener(this, "onRollOut");
-			onMouseWheel = new EventListener(this, "onMouseWheel");
-			onAddedToStage = new EventListener(this, "onAddedToStage");
-			onRemovedFromStage = new EventListener(this, "onRemovedFromStage");
-			onKeyDown = new EventListener(this, "onKeyDown");
-			onClickLink = new EventListener(this, "onClickLink");
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onClick
+		{
+			get { return _onClick ?? (_onClick = new EventListener(this, "onClick")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onRightClick
+		{
+			get { return _onRightClick ?? (_onRightClick = new EventListener(this, "onRightClick")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onTouchBegin
+		{
+			get { return _onTouchBegin ?? (_onTouchBegin = new EventListener(this, "onTouchBegin")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onTouchMove
+		{
+			get { return _onTouchMove ?? (_onTouchMove = new EventListener(this, "onTouchMove")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onTouchEnd
+		{
+			get { return _onTouchEnd ?? (_onTouchEnd = new EventListener(this, "onTouchEnd")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onRollOver
+		{
+			get { return _onRollOver ?? (_onRollOver = new EventListener(this, "onRollOver")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onRollOut
+		{
+			get { return _onRollOut ?? (_onRollOut = new EventListener(this, "onRollOut")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onMouseWheel
+		{
+			get { return _onMouseWheel ?? (_onMouseWheel = new EventListener(this, "onMouseWheel")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onAddedToStage
+		{
+			get { return _onAddedToStage ?? (_onAddedToStage = new EventListener(this, "onAddedToStage")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onRemovedFromStage
+		{
+			get { return _onRemovedFromStage ?? (_onRemovedFromStage = new EventListener(this, "onRemovedFromStage")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onKeyDown
+		{
+			get { return _onKeyDown ?? (_onKeyDown = new EventListener(this, "onKeyDown")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onClickLink
+		{
+			get { return _onClickLink ?? (_onClickLink = new EventListener(this, "onClickLink")); }
 		}
 
 		/// <summary>

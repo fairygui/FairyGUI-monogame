@@ -7,15 +7,13 @@ namespace FairyGUI
 	/// </summary>
 	public class EventListener
 	{
-		public EventDispatcher owner { get; private set; }
-
 		EventBridge _bridge;
 		string _type;
 
 		public EventListener(EventDispatcher owner, string type)
 		{
-			this.owner = owner;
-			this._type = type;
+			_bridge = owner.GetEventBridge(type);
+			_type = type;
 		}
 
 		/// <summary>
@@ -32,9 +30,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void AddCapture(EventCallback1 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.AddCapture(callback);
 		}
 
@@ -44,9 +39,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void RemoveCapture(EventCallback1 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.RemoveCapture(callback);
 		}
 
@@ -56,9 +48,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void Add(EventCallback1 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Add(callback);
 		}
 
@@ -68,9 +57,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void Remove(EventCallback1 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Remove(callback);
 		}
 
@@ -80,9 +66,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void Add(EventCallback0 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Add(callback);
 		}
 
@@ -92,9 +75,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void Remove(EventCallback0 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Remove(callback);
 		}
 
@@ -104,9 +84,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void Set(EventCallback1 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Clear();
 			if (callback != null)
 				_bridge.Add(callback);
@@ -118,9 +95,6 @@ namespace FairyGUI
 		/// <param name="callback"></param>
 		public void Set(EventCallback0 callback)
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Clear();
 			if (callback != null)
 				_bridge.Add(callback);
@@ -133,9 +107,7 @@ namespace FairyGUI
 		{
 			get
 			{
-				if (_bridge == null)
-					_bridge = this.owner.TryGetEventBridge(_type);
-				return _bridge == null || _bridge.isEmpty;
+				return !_bridge.owner.hasEventListeners(_type);
 			}
 		}
 
@@ -146,9 +118,7 @@ namespace FairyGUI
 		{
 			get
 			{
-				if (_bridge == null)
-					_bridge = this.owner.TryGetEventBridge(_type);
-				return _bridge != null && _bridge._dispatching;
+				return _bridge.owner.isDispatching(_type);
 			}
 		}
 
@@ -157,9 +127,6 @@ namespace FairyGUI
 		/// </summary>
 		public void Clear()
 		{
-			if (_bridge == null)
-				_bridge = this.owner.GetEventBridge(_type);
-
 			_bridge.Clear();
 		}
 
@@ -169,7 +136,7 @@ namespace FairyGUI
 		/// <returns></returns>
 		public bool Call()
 		{
-			return owner.InternalDispatchEvent(this._type, _bridge, null, null);
+			return _bridge.owner.InternalDispatchEvent(_type, _bridge, null, null);
 		}
 
 		/// <summary>
@@ -179,7 +146,7 @@ namespace FairyGUI
 		/// <returns></returns>
 		public bool Call(object data)
 		{
-			return owner.InternalDispatchEvent(this._type, _bridge, data, null);
+			return _bridge.owner.InternalDispatchEvent(_type, _bridge, data, null);
 		}
 
 		/// <summary>
@@ -189,7 +156,7 @@ namespace FairyGUI
 		/// <returns></returns>
 		public bool BubbleCall(object data)
 		{
-			return owner.BubbleEvent(_type, data);
+			return _bridge.owner.BubbleEvent(_type, data);
 		}
 
 		/// <summary>
@@ -198,7 +165,7 @@ namespace FairyGUI
 		/// <returns></returns>
 		public bool BubbleCall()
 		{
-			return owner.BubbleEvent(_type, null);
+			return _bridge.owner.BubbleEvent(_type, null);
 		}
 
 		/// <summary>
@@ -208,7 +175,7 @@ namespace FairyGUI
 		/// <returns></returns>
 		public bool BroadcastCall(object data)
 		{
-			return owner.BroadcastEvent(_type, data);
+			return _bridge.owner.BroadcastEvent(_type, data);
 		}
 
 		/// <summary>
@@ -217,7 +184,7 @@ namespace FairyGUI
 		/// <returns></returns>
 		public bool BroadcastCall()
 		{
-			return owner.BroadcastEvent(_type, null);
+			return _bridge.owner.BroadcastEvent(_type, null);
 		}
 	}
 }

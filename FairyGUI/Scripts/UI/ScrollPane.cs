@@ -14,27 +14,6 @@ namespace FairyGUI
 	public class ScrollPane : EventDispatcher
 	{
 		/// <summary>
-		/// Dispatched when scrolling.
-		/// 在滚动时派发该事件。
-		/// </summary>
-		public EventListener onScroll { get; private set; }
-
-		/// <summary>
-		/// 在滚动结束时派发该事件。
-		/// </summary>
-		public EventListener onScrollEnd { get; private set; }
-
-		/// <summary>
-		/// 向下拉过上边缘后释放则派发该事件。
-		/// </summary>
-		public EventListener onPullDownRelease { get; private set; }
-
-		/// <summary>
-		/// 向上拉过下边缘后释放则派发该事件。
-		/// </summary>
-		public EventListener onPullUpRelease { get; private set; }
-
-		/// <summary>
 		/// 当前被拖拽的滚动面板。同一时间只能有一个在进行此操作。
 		/// </summary>
 		public static ScrollPane draggingPane { get; private set; }
@@ -102,6 +81,11 @@ namespace FairyGUI
 		GComponent _footer;
 		Controller _pageController;
 
+		EventListener _onScroll;
+		EventListener _onScrollEnd;
+		EventListener _onPullDownRelease;
+		EventListener _onPullUpRelease;
+
 		static int _gestureFlag;
 
 		const float TWEEN_TIME_GO = 0.5f; //调用SetPos(ani)时使用的缓动时间
@@ -110,10 +94,8 @@ namespace FairyGUI
 
 		public ScrollPane(GComponent owner)
 		{
-			onScroll = new EventListener(this, "onScroll");
-			onScrollEnd = new EventListener(this, "onScrollEnd");
-			onPullDownRelease = new EventListener(this, "onPullDownRelease");
-			onPullUpRelease = new EventListener(this, "onPullUpRelease");
+			_onScroll = new EventListener(this, "onScroll");
+			_onScrollEnd = new EventListener(this, "onScrollEnd");
 
 			_scrollStep = UIConfig.defaultScrollStep;
 			_mouseWheelStep = _scrollStep * 2;
@@ -284,6 +266,39 @@ namespace FairyGUI
 				_header.Dispose();
 			if (_footer != null)
 				_footer.Dispose();
+		}
+
+		/// <summary>
+		/// Dispatched when scrolling.
+		/// 在滚动时派发该事件。
+		/// </summary>
+		public EventListener onScroll
+		{
+			get { return _onScroll ?? (_onScroll = new EventListener(this, "onScroll")); }
+		}
+
+		/// <summary>
+		/// 在滚动结束时派发该事件。
+		/// </summary>
+		public EventListener onScrollEnd
+		{
+			get { return _onScrollEnd ?? (_onScrollEnd = new EventListener(this, "onScrollEnd")); }
+		}
+
+		/// <summary>
+		/// 向下拉过上边缘后释放则派发该事件。
+		/// </summary>
+		public EventListener onPullDownRelease
+		{
+			get { return _onPullDownRelease ?? (_onPullDownRelease = new EventListener(this, "onPullDownRelease")); }
+		}
+
+		/// <summary>
+		/// 向上拉过下边缘后释放则派发该事件。
+		/// </summary>
+		public EventListener onPullUpRelease
+		{
+			get { return _onPullUpRelease ?? (_onPullUpRelease = new EventListener(this, "onPullUpRelease")); }
 		}
 
 		/// <summary>
@@ -941,7 +956,7 @@ namespace FairyGUI
 				return;
 
 			_headerLockedSize = size;
-			if (!onPullDownRelease.isDispatching && _container.xy.Get(_refreshBarAxis) >= 0)
+			if (!isDispatching("onPullDownRelease") && _container.xy.Get(_refreshBarAxis) >= 0)
 			{
 				_tweenStart = _container.xy;
 				_tweenChange = Vector2.Zero;
@@ -963,7 +978,7 @@ namespace FairyGUI
 				return;
 
 			_footerLockedSize = size;
-			if (!onPullUpRelease.isDispatching && _container.xy.Get(_refreshBarAxis) <= -_overlapSize.Get(_refreshBarAxis))
+			if (!isDispatching("onPullUpRelease") && _container.xy.Get(_refreshBarAxis) <= -_overlapSize.Get(_refreshBarAxis))
 			{
 				_tweenStart = _container.xy;
 				_tweenChange = Vector2.Zero;
@@ -1321,7 +1336,7 @@ namespace FairyGUI
 
 			Refresh2();
 
-			onScroll.Call();
+			_onScroll.Call();
 			if (_needRefresh) //在onScroll事件里开发者可能修改位置，这里再刷新一次，避免闪烁
 			{
 				_needRefresh = false;
@@ -1611,7 +1626,7 @@ namespace FairyGUI
 			CheckRefreshBar();
 			if (_pageMode)
 				UpdatePageController();
-			onScroll.Call();
+			_onScroll.Call();
 		}
 
 		private void __touchEnd(EventContext context)
@@ -1657,9 +1672,9 @@ namespace FairyGUI
 			{
 				_tweenChange = endPos - _tweenStart;
 				if (_tweenChange.X < -UIConfig.touchDragSensitivity || _tweenChange.Y < -UIConfig.touchDragSensitivity)
-					onPullDownRelease.Call();
+					DispatchEvent("onPullDownRelease", null);
 				else if (_tweenChange.X > UIConfig.touchDragSensitivity || _tweenChange.Y > UIConfig.touchDragSensitivity)
-					onPullUpRelease.Call();
+					DispatchEvent("onPullUpRelease", null);
 
 				if (_headerLockedSize > 0 && endPos.Get(_refreshBarAxis) == 0)
 				{
@@ -2077,12 +2092,12 @@ namespace FairyGUI
 			if (_tweening == 1) //取消类型为1的tween需立刻设置到终点
 			{
 				_container.xy = _tweenStart + _tweenChange;
-				onScroll.Call();
+				_onScroll.Call();
 			}
 
 			_tweening = 0;
 			Timers.inst.Remove(_tweenUpdateDelegate);
-			onScrollEnd.Call();
+			_onScrollEnd.Call();
 		}
 
 		void CheckRefreshBar()
@@ -2175,14 +2190,14 @@ namespace FairyGUI
 
 				SyncScrollBar(true);
 				CheckRefreshBar();
-				onScroll.Call();
-				onScrollEnd.Call();
+				_onScroll.Call();
+				_onScrollEnd.Call();
 			}
 			else
 			{
 				SyncScrollBar(false);
 				CheckRefreshBar();
-				onScroll.Call();
+				_onScroll.Call();
 			}
 		}
 

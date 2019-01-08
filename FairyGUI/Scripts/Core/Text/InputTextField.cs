@@ -24,26 +24,6 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		public EventListener onFocusIn { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onFocusOut { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onChanged { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public EventListener onSubmit { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
 		public int maxLength { get; set; }
 
 		/// <summary>
@@ -72,6 +52,11 @@ namespace FairyGUI
 		int _selectionStart;
 		int _composing;
 
+		EventListener _onFocusIn;
+		EventListener _onFocusOut;
+		EventListener _onChanged;
+		EventListener _onSubmit;
+
 		static Shape _caret;
 		static SelectionShape _selectionShape;
 		static float _nextBlink;
@@ -81,11 +66,6 @@ namespace FairyGUI
 
 		public InputTextField()
 		{
-			onFocusIn = new EventListener(this, "onFocusIn");
-			onFocusOut = new EventListener(this, "onFocusOut");
-			onChanged = new EventListener(this, "onChanged");
-			onSubmit = new EventListener(this, "onSubmit");
-
 			_text = string.Empty;
 			maxLength = 0;
 			editable = true;
@@ -102,6 +82,39 @@ namespace FairyGUI
 			onKeyDown.AddCapture(__keydown);
 			onTouchBegin.AddCapture(__touchBegin);
 			onTouchMove.AddCapture(__touchMove);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onFocusIn
+		{
+			get { return _onFocusIn ?? (_onFocusIn = new EventListener(this, "onFocusIn")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onFocusOut
+		{
+			get { return _onFocusOut ?? (_onFocusOut = new EventListener(this, "onFocusOut")); }
+
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onChanged
+		{
+			get { return _onChanged ?? (_onChanged = new EventListener(this, "onChanged")); }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public EventListener onSubmit
+		{
+			get { return _onSubmit ?? (_onSubmit = new EventListener(this, "onSubmit")); }
 		}
 
 		/// <summary>
@@ -296,7 +309,7 @@ namespace FairyGUI
 				buffer.Length = maxLength;
 
 			this.text = buffer.ToString();
-			onChanged.Call();
+			DispatchEvent("onChanged", null);
 		}
 
 		/// <summary>
@@ -314,7 +327,7 @@ namespace FairyGUI
 				value = value.Substring(0, maxLength);
 
 			this.text = value;
-			onChanged.Call();
+			DispatchEvent("onChanged", null);
 		}
 
 		string ValidateInput(string source)
@@ -1014,7 +1027,7 @@ namespace FairyGUI
 					{
 						if (textField.singleLine)
 						{
-							onSubmit.Call();
+							DispatchEvent("onSubmit", null);
 							return;
 						}
 						break;

@@ -55,16 +55,6 @@ namespace FairyGUI
 		public ListItemProvider itemProvider;
 
 		/// <summary>
-		/// Dispatched when a list item being clicked.
-		/// </summary>
-		public EventListener onClickItem { get; private set; }
-
-		/// <summary>
-		/// Dispatched when a list item being clicked with right button.
-		/// </summary>
-		public EventListener onRightClickItem { get; private set; }
-
-		/// <summary>
 		/// 
 		/// </summary>
 		public bool scrollItemToViewOnClick;
@@ -82,6 +72,9 @@ namespace FairyGUI
 		GObjectPool _pool;
 		bool _selectionHandled;
 		int _lastSelectedIndex;
+
+		EventListener _onClickItem;
+		EventListener _onRightClickItem;
 
 		//Virtual List support
 		bool _virtual;
@@ -122,8 +115,6 @@ namespace FairyGUI
 
 			_itemClickDelegate = __clickItem;
 			_itemTouchBeginDelegate = __itemTouchBegin;
-			onClickItem = new EventListener(this, "onClickItem");
-			onRightClickItem = new EventListener(this, "onRightClickItem");
 		}
 
 		public override void Dispose()
@@ -138,6 +129,22 @@ namespace FairyGUI
 			itemProvider = null;
 
 			base.Dispose();
+		}
+
+		/// <summary>
+		/// Dispatched when a list item being clicked.
+		/// </summary>
+		public EventListener onClickItem
+		{
+			get { return _onClickItem ?? (_onClickItem = new EventListener(this, "onClickItem")); }
+		}
+
+		/// <summary>
+		/// Dispatched when a list item being clicked with right button.
+		/// </summary>
+		public EventListener onRightClickItem
+		{
+			get { return _onRightClickItem ?? (_onRightClickItem = new EventListener(this, "onRightClickItem")); }
 		}
 
 		/// <summary>
@@ -930,9 +937,9 @@ namespace FairyGUI
 				scrollPane.ScrollToView(item, true);
 
 			if (context.type == item.onRightClick.type)
-				onRightClickItem.Call(item);
+				DispatchEvent("onRightClickItem", item);
 			else
-				onClickItem.Call(item);
+				DispatchEvent("onClickItem", item);
 		}
 
 		void SetSelectionOnEvent(GObject item, InputEvent evt)
