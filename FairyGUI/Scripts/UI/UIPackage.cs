@@ -786,28 +786,17 @@ namespace FairyGUI
 				nextPos += buffer.position;
 
 				frame = new MovieClip.Frame();
-				frame.rect.X = buffer.ReadInt();
-				frame.rect.Y = buffer.ReadInt();
-				frame.rect.Width = buffer.ReadInt();
-				frame.rect.Height = buffer.ReadInt();
+				float fx = buffer.ReadInt();
+				float fy = buffer.ReadInt();
+				buffer.ReadInt(); //width
+				buffer.ReadInt(); //height
 				frame.addDelay = buffer.ReadInt() / 1000f;
 				spriteId = buffer.ReadS();
 
 				if (spriteId != null && _sprites.TryGetValue(spriteId, out sprite))
 				{
-					if (item.texture == null)
-						item.texture = (NTexture)GetItemAsset(sprite.atlas);
-					frame.uvRect = new Rectangle(sprite.rect.X / item.texture.width * item.texture.uvRect.Width,
-						sprite.rect.Y / item.texture.height * item.texture.uvRect.Height,
-						sprite.rect.Width * item.texture.uvRect.Width / item.texture.width,
-						sprite.rect.Height * item.texture.uvRect.Height / item.texture.height);
-					frame.rotated = sprite.rotated;
-					if (frame.rotated)
-					{
-						float tmp = frame.uvRect.Width;
-						frame.uvRect.Width = frame.uvRect.Height;
-						frame.uvRect.Height = tmp;
-					}
+					frame.texture = new NTexture((NTexture)GetItemAsset(sprite.atlas), sprite.rect, sprite.rotated,
+						new Vector2(item.width, item.height), new Vector2(fx, fy));
 				}
 				item.frames[i] = frame;
 
@@ -875,21 +864,19 @@ namespace FairyGUI
 				{
 					if (mainSprite.rotated)
 					{
-						float texBaseY = 1 - (float)(mainSprite.rect.Y + mainSprite.rect.Height - bx) * texScaleY;
 						bg.uv[0] = new Vector2((float)(by + bg.height + mainSprite.rect.X) * texScaleX,
-							texBaseY);
-						bg.uv[1] = new Vector2(bg.uv[0].X - (float)bg.height * texScaleX, texBaseY);
-						bg.uv[2] = new Vector2(bg.uv[1].X, texBaseY + (float)bg.width * texScaleY);
-						bg.uv[3] = new Vector2(bg.uv[0].X, texBaseY + (float)bg.width * texScaleY);
+							1 - (float)(mainSprite.rect.Bottom - bx) * texScaleY);
+						bg.uv[1] = new Vector2(bg.uv[0].X - (float)bg.height * texScaleX, bg.uv[0].Y);
+						bg.uv[2] = new Vector2(bg.uv[1].X, bg.uv[0].Y + (float)bg.width * texScaleY);
+						bg.uv[3] = new Vector2(bg.uv[0].X, bg.uv[2].Y);
 					}
 					else
 					{
-						float texBaseY = (float)(by + mainSprite.rect.Y) * texScaleY;
 						bg.uv[0] = new Vector2((float)(bx + mainSprite.rect.X) * texScaleX,
-							texBaseY + (float)bg.height * texScaleY);
-						bg.uv[1] = new Vector2(bg.uv[0].X, texBaseY);
-						bg.uv[2] = new Vector2(bg.uv[0].X + (float)bg.width * texScaleX, texBaseY);
-						bg.uv[3] = new Vector2(bg.uv[2].X, texBaseY + (float)bg.height * texScaleY);
+							1 - (float)(by + bg.height + mainSprite.rect.Y) * texScaleY);
+						bg.uv[1] = new Vector2(bg.uv[0].X, bg.uv[0].Y + (float)bg.height * texScaleY);
+						bg.uv[2] = new Vector2(bg.uv[0].X + (float)bg.width * texScaleX, bg.uv[1].Y);
+						bg.uv[3] = new Vector2(bg.uv[2].X, bg.uv[0].Y);
 					}
 
 					bg.lineHeight = lineHeight;
@@ -900,13 +887,7 @@ namespace FairyGUI
 					if (_itemsById.TryGetValue(img, out charImg))
 					{
 						GetItemAsset(charImg);
-						Rectangle uvRect = charImg.texture.uvRect;
-						bg.uv[0] = new Vector2(uvRect.X, uvRect.Bottom);
-						bg.uv[1] = new Vector2(uvRect.X, uvRect.Y);
-						bg.uv[2] = new Vector2(uvRect.Right, uvRect.Y);
-						bg.uv[3] = new Vector2(uvRect.Right, uvRect.Bottom);
-						if (charImg.texture.rotated)
-							NGraphics.RotateUV(bg.uv, ref uvRect);
+						charImg.texture.GetUV(bg.uv);
 						bg.width = charImg.texture.width;
 						bg.height = charImg.texture.height;
 

@@ -37,14 +37,14 @@ namespace FairyGUI
 		public float interval;
 		public float repeatDelay;
 		public bool swing;
-        public MovieClip.Frame[] frames;
+		public MovieClip.Frame[] frames;
 
-        //component
-        public bool translated;
-        public UIObjectFactory.GComponentCreator extensionCreator;
+		//component
+		public bool translated;
+		public UIObjectFactory.GComponentCreator extensionCreator;
 
-        //font
-        public BitmapFont bitmapFont;
+		//font
+		public BitmapFont bitmapFont;
 
 		//sound
 		public SoundEffectInstance audioClip;

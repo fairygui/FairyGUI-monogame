@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 #if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
@@ -34,6 +35,8 @@ namespace FairyGUI
 		Texture2D _nativeTexture;
 		Texture2D _alphaTexture;
 		Rectangle _region;
+		Vector2 _offset;
+		Vector2 _originalSize;
 		NTexture _root;
 
 		static Texture2D CreateEmptyTexture(GraphicsDevice graphics)
@@ -81,12 +84,8 @@ namespace FairyGUI
 		/// </summary>
 		/// <param name="graphics"></param>
 		/// <param name="texture"></param>
-		public NTexture(Texture2D texture)
+		public NTexture(Texture2D texture) : this(texture, null, 1, 1)
 		{
-			_root = this;
-			_nativeTexture = texture;
-			uvRect = new Rectangle(0, 0, 1, 1);
-			_region = new Rectangle(0, 0, texture.Width, texture.Height);
 		}
 
 		/// <summary>
@@ -102,7 +101,8 @@ namespace FairyGUI
 			_nativeTexture = texture;
 			_alphaTexture = alphaTexture;
 			uvRect = new Rectangle(0, 0, xScale, yScale);
-			_region = new Rectangle(0, 0, texture.Width, texture.Height);
+			_originalSize = new Vector2(texture.Width, texture.Height);
+			_region = new Rectangle(0, 0, _originalSize.X, _originalSize.Y);
 		}
 
 		/// <summary>
@@ -115,7 +115,8 @@ namespace FairyGUI
 			_root = this;
 			_nativeTexture = texture;
 			_region = region;
-			uvRect = new Rectangle(region.X / _nativeTexture.Width, region.Y / _nativeTexture.Height,
+			_originalSize = new Vector2(_region.Width, _region.Height);
+			uvRect = new Rectangle(region.X / _nativeTexture.Width, 1 - region.Bottom / _nativeTexture.Height,
 				region.Width / _nativeTexture.Width, region.Height / _nativeTexture.Height);
 		}
 
@@ -130,7 +131,7 @@ namespace FairyGUI
 			this.rotated = rotated;
 			region.X += root._region.X;
 			region.Y += root._region.Y;
-			uvRect = new Rectangle(region.X * root.uvRect.Width / root.width, region.Y * root.uvRect.Height / root.height,
+			uvRect = new Rectangle(region.X * root.uvRect.Width / root.width, 1 - region.Bottom * root.uvRect.Height / root.height,
 				region.Width * root.uvRect.Width / root.width, region.Height * root.uvRect.Height / root.height);
 			if (rotated)
 			{
@@ -144,6 +145,22 @@ namespace FairyGUI
 			}
 
 			_region = region;
+			_originalSize = new Vector2(_region.Width, _region.Height);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="region"></param>
+		/// <param name="rotated"></param>
+		/// <param name="originalSize"></param>
+		/// <param name="offset"></param>
+		public NTexture(NTexture root, Rectangle region, bool rotated, Vector2 originalSize, Vector2 offset)
+			: this(root, region, rotated)
+		{
+			_originalSize = originalSize;
+			_offset = offset;
 		}
 
 		/// <summary>
@@ -160,6 +177,65 @@ namespace FairyGUI
 		public int height
 		{
 			get { return (int)_region.Height; }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public Vector2 offset
+		{
+			get { return _offset; }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public Vector2 originalSize
+		{
+			get { return _originalSize; }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="drawRect"></param>
+		/// <returns></returns>
+		public Rectangle GetDrawRect(Rectangle drawRect)
+		{
+			if (_originalSize.X == _region.Width && _originalSize.Y == _region.Height)
+				return drawRect;
+
+			float sx = drawRect.Width / _originalSize.X;
+			float sy = drawRect.Height / _originalSize.Y;
+			return new Rectangle(_offset.X * sx, _offset.Y * sy, _region.Width * sx, _region.Height * sy);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="uv"></param>
+		public void GetUV(Vector2[] uv)
+		{
+			uv[0] = new Vector2(uvRect.X, uvRect.Y);
+			uv[1] = new Vector2(uvRect.X, uvRect.Bottom);
+			uv[2] = new Vector2(uvRect.Right, uvRect.Bottom);
+			uv[3] = new Vector2(uvRect.Right, uvRect.Y);
+			if (rotated)
+			{
+				float xMin = uvRect.X;
+				float yMin = uvRect.Y;
+				float yMax = uvRect.Bottom;
+
+				float tmp;
+				for (int i = 0; i < 4; i++)
+				{
+					Vector2 m = uv[i];
+					tmp = m.Y;
+					m.Y = yMin + m.X - xMin;
+					m.X = xMin + yMax - tmp;
+					uv[i] = m;
+				}
+			}
 		}
 
 		/// <summary>

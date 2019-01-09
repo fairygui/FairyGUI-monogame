@@ -90,18 +90,16 @@ namespace FairyGUI
 			}
 		}
 
-		public bool GetGlyph(char ch, GlyphInfo glyph)
+		public bool GetGlyph(char ch, ref GlyphInfo glyph)
 		{
 			BMGlyph bg;
 			if (ch == ' ')
 			{
 				glyph.width = (int)Math.Ceiling(size * scale / 2);
 				glyph.height = (int)Math.Ceiling(size * scale);
-				glyph.vert.X = 0;
-				glyph.vert.Width = 0;
-				glyph.vert.Y = 0;
-				glyph.vert.Height = 0;
-				glyph.uv[0] = glyph.uv[1] = glyph.uv[2] = glyph.uv[3] = Vector2.Zero;
+				glyph.vertMin = Vector2.Zero;
+				glyph.vertMax = Vector2.Zero;
+				glyph.uvBottomLeft = glyph.uvBottomRight = glyph.uvTopLeft = glyph.uvTopRight = Vector2.Zero;
 				glyph.channel = 0;
 				return true;
 			}
@@ -109,14 +107,14 @@ namespace FairyGUI
 			{
 				glyph.width = (int)Math.Ceiling(bg.advance * scale);
 				glyph.height = (int)Math.Ceiling(bg.lineHeight * scale);
-				glyph.vert.X = bg.offsetX * (int)scale;
-				glyph.vert.Width = bg.width * (int)scale;
-				glyph.vert.Y = bg.offsetY * (int)scale;
-				glyph.vert.Height = bg.height * (int)scale;
-				glyph.uv[0] = bg.uv[0];
-				glyph.uv[1] = bg.uv[1];
-				glyph.uv[2] = bg.uv[2];
-				glyph.uv[3] = bg.uv[3];
+				glyph.vertMin.X = bg.offsetX * scale;
+				glyph.vertMin.Y = bg.offsetY * scale;
+				glyph.vertMax.X = (bg.offsetX + bg.width) * scale;
+				glyph.vertMax.Y = (bg.offsetY + bg.height) * scale;
+				glyph.uvBottomLeft = bg.uv[0];
+				glyph.uvTopLeft = bg.uv[1];
+				glyph.uvTopRight = bg.uv[2];
+				glyph.uvBottomRight = bg.uv[3];
 				glyph.channel = bg.channel;
 				return true;
 			}

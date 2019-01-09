@@ -1,6 +1,4 @@
 ﻿using System;
-using FairyGUI.Utils;
-using Microsoft.Xna.Framework;
 
 #if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
@@ -18,10 +16,8 @@ namespace FairyGUI
 		/// </summary>
 		public class Frame
 		{
-			public Rectangle rect;
+			public NTexture texture;
 			public float addDelay;
-			public Rectangle uvRect;
-			public bool rotated;
 		}
 
 		/// <summary>
@@ -42,16 +38,6 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		public int frameCount { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public Frame[] frames { get; private set; }
-
-		/// <summary>
-		/// 
-		/// </summary>
 		public float timeScale;
 
 		/// <summary>
@@ -59,6 +45,8 @@ namespace FairyGUI
 		/// </summary>
 		public bool ignoreEngineTimeScale;
 
+		Frame[] _frames;
+		int _frameCount;
 		int _frame;
 		bool _playing;
 		int _start;
@@ -70,7 +58,6 @@ namespace FairyGUI
 		float _frameElapsed; //当前帧延迟
 		bool _reversed;
 		int _repeatedCount;
-		int _displayFrame;
 		TimerCallback _timerDelegate;
 
 		EventListener _onPlayEnd;
@@ -103,42 +90,43 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="texture"></param>
-		/// <param name="frames"></param>
-		/// <param name="boundsRect"></param>
-		public void SetData(NTexture texture, Frame[] frames, Rectangle boundsRect)
+		public Frame[] frames
 		{
-			this.frames = frames;
-			this.frameCount = frames.Length;
-			_contentRect = boundsRect;
+			get
+			{
+				return _frames;
+			}
+			set
+			{
+				_frames = value;
+				_scale9Grid = null;
+				_scaleByTile = false;
+				this.fillMethod = FillMethod.None;
 
-			if (_end == -1 || _end > frameCount - 1)
-				_end = frameCount - 1;
-			if (_endAt == -1 || _endAt > frameCount - 1)
-				_endAt = frameCount - 1;
+				if (_frames == null)
+				{
+					_frameCount = 0;
+					graphics.texture = null;
+					CheckTimer();
+					return;
+				}
+				_frameCount = frames.Length;
 
-			if (_frame < 0 || _frame > frameCount - 1)
-				_frame = frameCount - 1;
+				if (_end == -1 || _end > _frameCount - 1)
+					_end = _frameCount - 1;
+				if (_endAt == -1 || _endAt > _frameCount - 1)
+					_endAt = _frameCount - 1;
 
-			graphics.texture = texture;
-			OnSizeChanged(true, true);
+				if (_frame < 0 || _frame > _frameCount - 1)
+					_frame = _frameCount - 1;
 
-			_displayFrame = -1;
-			_frameElapsed = 0;
-			_repeatedCount = 0;
-			_reversed = false;
+				_frameElapsed = 0;
+				_repeatedCount = 0;
+				_reversed = false;
 
-			CheckTimer();
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Clear()
-		{
-			this.frameCount = 0;
-			graphics.texture = null;
-			graphics.ClearMesh();
+				DrawFrame();
+				CheckTimer();
+			}
 		}
 
 		/// <summary>
@@ -167,12 +155,12 @@ namespace FairyGUI
 			{
 				if (_frame != value)
 				{
-					if (frames != null && value >= frameCount)
-						value = frameCount - 1;
+					if (_frames != null && value >= _frameCount)
+						value = _frameCount - 1;
 
 					_frame = value;
 					_frameElapsed = 0;
-					_displayFrame = -1;
+					DrawFrame();
 				}
 			}
 		}
@@ -186,6 +174,7 @@ namespace FairyGUI
 			_frameElapsed = 0;
 			_reversed = false;
 			_repeatedCount = 0;
+			DrawFrame();
 		}
 
 		/// <summary>
@@ -198,7 +187,7 @@ namespace FairyGUI
 			_frameElapsed = anotherMc._frameElapsed;
 			_reversed = anotherMc._reversed;
 			_repeatedCount = anotherMc._repeatedCount;
-			_displayFrame = -1;
+			DrawFrame();
 		}
 
 		/// <summary>
@@ -212,7 +201,7 @@ namespace FairyGUI
 			float backupTime = time;
 			while (true)
 			{
-				float tt = interval + frames[_frame].addDelay;
+				float tt = interval + _frames[_frame].addDelay;
 				if (_frame == 0 && _repeatedCount > 0)
 					tt += repeatDelay;
 				if (time < tt)
@@ -238,9 +227,9 @@ namespace FairyGUI
 					else
 					{
 						_frame++;
-						if (_frame > frameCount - 1)
+						if (_frame > _frameCount - 1)
 						{
-							_frame = Math.Max(0, frameCount - 2);
+							_frame = Math.Max(0, _frameCount - 2);
 							_repeatedCount++;
 							_reversed = !_reversed;
 						}
@@ -249,7 +238,7 @@ namespace FairyGUI
 				else
 				{
 					_frame++;
-					if (_frame > frameCount - 1)
+					if (_frame > _frameCount - 1)
 					{
 						_frame = 0;
 						_repeatedCount++;
@@ -262,6 +251,8 @@ namespace FairyGUI
 					time -= (int)Math.Floor(time / roundTime) * roundTime; //跳过
 				}
 			}
+
+			DrawFrame();
 		}
 
 		/// <summary>
@@ -283,8 +274,8 @@ namespace FairyGUI
 		{
 			_start = start;
 			_end = end;
-			if (_end == -1 || _end > frameCount - 1)
-				_end = frameCount - 1;
+			if (_end == -1 || _end > _frameCount - 1)
+				_end = _frameCount - 1;
 			_times = times;
 			_endAt = endAt;
 			if (_endAt == -1)
@@ -295,7 +286,7 @@ namespace FairyGUI
 
 		void OnAddedToStage()
 		{
-			if (_playing && frameCount > 0)
+			if (_playing && _frameCount > 0)
 				Timers.inst.AddUpdate(_timerDelegate);
 		}
 
@@ -306,7 +297,7 @@ namespace FairyGUI
 
 		void CheckTimer()
 		{
-			if (_playing && frameCount > 0 && this.stage != null)
+			if (_playing && _frameCount > 0 && this.stage != null)
 				Timers.inst.AddUpdate(_timerDelegate);
 			else
 				Timers.inst.Remove(_timerDelegate);
@@ -314,7 +305,7 @@ namespace FairyGUI
 
 		void OnTimer(object param)
 		{
-			if (!_playing || frameCount == 0 || _status == 3)
+			if (!_playing || _frameCount == 0 || _status == 3)
 				return;
 
 			float dt = Timers.deltaTime;
@@ -322,7 +313,7 @@ namespace FairyGUI
 				dt *= timeScale;
 
 			_frameElapsed += dt;
-			float tt = interval + frames[_frame].addDelay;
+			float tt = interval + _frames[_frame].addDelay;
 			if (_frame == 0 && _repeatedCount > 0)
 				tt += repeatDelay;
 			if (_frameElapsed < tt)
@@ -347,9 +338,9 @@ namespace FairyGUI
 				else
 				{
 					_frame++;
-					if (_frame > frameCount - 1)
+					if (_frame > _frameCount - 1)
 					{
-						_frame = Math.Max(0, frameCount - 2);
+						_frame = Math.Max(0, _frameCount - 2);
 						_repeatedCount++;
 						_reversed = !_reversed;
 					}
@@ -358,7 +349,7 @@ namespace FairyGUI
 			else
 			{
 				_frame++;
-				if (_frame > frameCount - 1)
+				if (_frame > _frameCount - 1)
 				{
 					_frame = 0;
 					_repeatedCount++;
@@ -370,17 +361,20 @@ namespace FairyGUI
 				_frame = _start;
 				_frameElapsed = 0;
 				_status = 0;
+				DrawFrame();
 			}
 			else if (_status == 2) //ending
 			{
 				_frame = _endAt;
 				_frameElapsed = 0;
 				_status = 3; //ended
+				DrawFrame();
 
 				DispatchEvent("onPlayEnd", null);
 			}
 			else
 			{
+				DrawFrame();
 				if (_frame == _end)
 				{
 					if (_times > 0)
@@ -397,52 +391,12 @@ namespace FairyGUI
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="batch"></param>
-		public override void Draw(FairyBatch batch)
-		{
-			if (frameCount > 0 && _frame != _displayFrame)
-				DrawFrame();
-
-			base.Draw(batch);
-		}
-
 		void DrawFrame()
 		{
-			_displayFrame = _frame;
-
-			if (_frame >= frames.Length)
-				graphics.ClearMesh();
-			else
+			if (_frameCount > 0)
 			{
-				Frame frame = frames[_frame];
-
-				if (frame.rect.Width == 0)
-					graphics.ClearMesh();
-				else
-				{
-					Rectangle uvRect = frame.uvRect;
-					if (_flip != FlipType.None)
-						ToolSet.FlipRect(ref uvRect, _flip);
-
-					graphics.DrawRect(frame.rect, uvRect, _color);
-					if (frame.rotated)
-						NGraphics.RotateUV(graphics.uv, ref uvRect);
-					graphics.UpdateMesh();
-				}
-			}
-		}
-
-		protected override void Rebuild()
-		{
-			if (_texture != null)
-				base.Rebuild();
-			else if (frameCount > 0)
-			{
-				_requireUpdateMesh = false;
-				DrawFrame();
+				Frame frame = _frames[_frame];
+				graphics.texture = frame.texture;
 			}
 		}
 	}

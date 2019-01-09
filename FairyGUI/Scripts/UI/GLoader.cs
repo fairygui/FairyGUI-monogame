@@ -384,7 +384,7 @@ namespace FairyGUI
 					_content.interval = _contentItem.interval;
 					_content.swing = _contentItem.swing;
 					_content.repeatDelay = _contentItem.repeatDelay;
-					_content.SetData(_contentItem.texture, _contentItem.frames, new Rectangle(0, 0, (int)_contentSourceWidth, (int)_contentSourceHeight));
+					_content.frames = _contentItem.frames;
 
 					UpdateLayout();
 				}
@@ -427,7 +427,7 @@ namespace FairyGUI
 				Texture2D tex = Stage.game.Content.Load<Texture2D>(_url);
 				_content.texture = new NTexture(tex);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				Log.Info("LoadExternal failed: " + e.Message);
 			}
@@ -489,7 +489,7 @@ namespace FairyGUI
 
 		private void UpdateLayout()
 		{
-			if (_content2 == null && _content.texture == null && _content.frameCount == 0)
+			if (_content2 == null && _content.texture == null && _content.frames == null)
 			{
 				if (_autoSize)
 				{
@@ -523,9 +523,7 @@ namespace FairyGUI
 					else
 					{
 						_content.SetPosition(0, 0);
-						_content.SetScale(1, 1);
-						if (_content.texture != null)
-							_content.SetNativeSize();
+						_content.SetSize(_contentWidth, _contentHeight);
 					}
 					return;
 				}
@@ -573,16 +571,9 @@ namespace FairyGUI
 			}
 
 			if (_content2 != null)
-			{
 				_content2.SetScale(sx, sy);
-			}
-			else if (_content.texture != null)
-			{
-				_content.SetScale(1, 1);
-				_content.size = new Vector2(_contentWidth, _contentHeight);
-			}
 			else
-				_content.SetScale(sx, sy);
+				_content.size = new Vector2(_contentWidth, _contentHeight);
 
 			float nx;
 			float ny;
@@ -608,14 +599,12 @@ namespace FairyGUI
 		{
 			ClearErrorState();
 
-			if (_content.texture != null)
-			{
-				if (_contentItem == null)
-					FreeExternal(image.texture);
-				_content.texture = null;
-			}
+			if (_contentItem == null && _content.texture != null)
+				FreeExternal(image.texture);
 
-			_content.Clear();
+			_content.texture = null;
+			_content.frames = null;
+
 			if (_content2 != null)
 			{
 				_content2.Dispose();

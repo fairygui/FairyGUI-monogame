@@ -71,6 +71,10 @@ namespace FairyGUI.Test.Scenes
 
 			switch (type)
 			{
+				case "Graph":
+					PlayGraph();
+					break;
+
 				case "Button":
 					PlayButton();
 					break;
@@ -113,6 +117,96 @@ namespace FairyGUI.Test.Scenes
 		{
 			_viewController.selectedIndex = 0;
 			_backBtn.visible = false;
+		}
+
+		//-----------------------------
+		private void PlayGraph()
+		{
+			GComponent obj = _demoObjects["Graph"];
+
+			Shape shape;
+
+			shape = obj.GetChild("pie").asGraph.shape;
+			EllipseMesh ellipse = shape.graphics.GetMeshFactory<EllipseMesh>();
+			ellipse.startDegree = 30;
+			ellipse.endDegreee = 300;
+			shape.graphics.SetMeshDirty();
+
+			shape = obj.GetChild("trapezoid").asGraph.shape;
+			PolygonMesh trapezoid = shape.graphics.GetMeshFactory<PolygonMesh>();
+			trapezoid.usePercentPositions = true;
+			trapezoid.points.Clear();
+			trapezoid.points.Add(new Vector2(0.3f, 0));
+			trapezoid.points.Add(new Vector2(0.7f, 0));
+			trapezoid.points.Add(new Vector2(1f, 1f));
+			trapezoid.points.Add(new Vector2(0f, 1f));
+			shape.graphics.SetMeshDirty();
+
+			shape = obj.GetChild("polygon").asGraph.shape;
+			shape.DrawPolygon(new Vector2[] {
+			new Vector2(20, 30),
+			new Vector2(80, 40),
+			new Vector2(80, 15),
+			new Vector2(140, 50),
+			new Vector2(80, 85),
+			new Vector2(80, 60),
+			new Vector2(20, 70)
+		}, shape.color);
+
+			shape = obj.GetChild("polygon2").asGraph.shape;
+			shape.DrawRegularPolygon(5, 2, Color.Yellow, Color.Black, shape.color, -18, null);
+
+			shape = obj.GetChild("radial").asGraph.shape;
+			shape.DrawRegularPolygon(6, 2, shape.color, new Color(0xFF, 0x99, 0x00, 128), shape.color, 0, new float[] { 0.6f, 0.8f, 0.6f, 0.8f, 0.6f, 0.5f });
+
+			shape = obj.GetChild("line").asGraph.shape;
+			LineMesh line = shape.graphics.GetMeshFactory<LineMesh>();
+			line.lineWidth = 5;
+			//line.lineWidthCurve = AnimationCurve.Linear(0, 25, 1, 10);
+			line.roundEdge = true;
+			//line.gradient = lineGradient;
+			line.path.Create(new GPathPoint[] {
+			new GPathPoint(new Vector3(0, 120, 0)),
+			new GPathPoint(new Vector3(20, 120, 0)),
+			new GPathPoint(new Vector3(100, 100, 0)),
+			new GPathPoint(new Vector3(180, 30, 0)),
+			new GPathPoint(new Vector3(100, 0, 0)),
+			new GPathPoint(new Vector3(20, 30, 0)),
+			new GPathPoint(new Vector3(100, 100, 0)),
+			new GPathPoint(new Vector3(180, 120, 0)),
+			new GPathPoint(new Vector3(200, 120, 0)),
+		});
+			shape.graphics.SetMeshDirty();
+			GTween.To(0, 1, 5).SetEase(EaseType.Linear).SetTarget(shape.graphics).OnUpdate((GTweener t) =>
+			{
+				((NGraphics)t.target).GetMeshFactory<LineMesh>().fillEnd = t.value.x;
+				((NGraphics)t.target).SetMeshDirty();
+			});
+
+			shape = obj.GetChild("line2").asGraph.shape;
+			LineMesh line2 = shape.graphics.GetMeshFactory<LineMesh>();
+			line2.lineWidth = 3;
+			line2.roundEdge = true;
+			line2.path.Create(new GPathPoint[] {
+			new GPathPoint(new Vector3(0, 120, 0), GPathPoint.CurveType.Straight),
+			new GPathPoint(new Vector3(60, 30, 0), GPathPoint.CurveType.Straight),
+			new GPathPoint(new Vector3(80, 90, 0), GPathPoint.CurveType.Straight),
+			new GPathPoint(new Vector3(140, 30, 0), GPathPoint.CurveType.Straight),
+			new GPathPoint(new Vector3(160, 90, 0), GPathPoint.CurveType.Straight),
+			new GPathPoint(new Vector3(220, 30, 0), GPathPoint.CurveType.Straight)
+		});
+			shape.graphics.SetMeshDirty();
+
+			GObject image = obj.GetChild("line3");
+			LineMesh line3 = image.displayObject.graphics.GetMeshFactory<LineMesh>();
+			line3.lineWidth = 30;
+			line3.roundEdge = false;
+			line3.path.Create(new GPathPoint[] {
+			new GPathPoint(new Vector3(0, 30, 0), new Vector3(50, -30, 0), new Vector3(150, -50, 0)),
+			new GPathPoint(new Vector3(200, 30, 0), new Vector3(300, 130, 0)),
+			new GPathPoint(new Vector3(400, 30, 0))
+		});
+			image.displayObject.graphics.SetMeshDirty();
 		}
 
 		//-----------------------------

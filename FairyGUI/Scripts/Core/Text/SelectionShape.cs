@@ -11,49 +11,17 @@ namespace FairyGUI
 	/// <summary>
 	/// 
 	/// </summary>
-	public class SelectionShape : DisplayObject
+	public class SelectionShape : DisplayObject, IMeshFactory
 	{
-		List<Rectangle> _rects;
-		Color _color;
+		public readonly List<Rectangle> rects;
 
 		public SelectionShape()
 		{
 			graphics = new NGraphics();
 			graphics.texture = NTexture.Empty;
-			_color = Color.White;
-		}
+			graphics.meshFactory = this;
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public List<Rectangle> rects
-		{
-			get { return _rects; }
-			set
-			{
-				_rects = value;
-
-				if (_rects != null)
-				{
-					int count = _rects.Count;
-					if (count > 0)
-					{
-						_contentRect = _rects[0];
-						Rectangle tmp;
-						for (int i = 1; i < count; i++)
-						{
-							tmp = _rects[i];
-							_contentRect = ToolSet.Union(ref _contentRect, ref tmp);
-						}
-					}
-					else
-						_contentRect = new Rectangle(0, 0, 0, 0);
-				}
-				else
-					_contentRect = new Rectangle(0, 0, 0, 0);
-				OnSizeChanged(true, true);
-				_requireUpdateMesh = true;
-			}
+			rects = new List<Rectangle>();
 		}
 
 		/// <summary>
@@ -61,71 +29,65 @@ namespace FairyGUI
 		/// </summary>
 		public Color color
 		{
-			get { return _color; }
+			get
+			{
+				return graphics.color;
+			}
 			set
 			{
-				_color = value;
-				graphics.Tint(_color);
+				graphics.color = value;
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
+		public void Refresh()
+		{
+			int count = rects.Count;
+			if (count > 0)
+			{
+				Rectangle rect = new Rectangle();
+				rect = rects[0];
+				Rectangle tmp;
+				for (int i = 1; i < count; i++)
+				{
+					tmp = rects[i];
+					rect = ToolSet.Union(ref rect, ref tmp);
+				}
+				SetSize(rect.Right, rect.Bottom);
+			}
+			else
+				SetSize(0, 0);
+			graphics.SetMeshDirty();
+		}
+
 		public void Clear()
 		{
-			if (_rects != null && _rects.Count > 0)
-			{
-				_rects.Clear();
-				_contentRect = new Rectangle(0, 0, 0, 0);
-				OnSizeChanged(true, true);
-				_requireUpdateMesh = true;
-			}
+			rects.Clear();
+			graphics.SetMeshDirty();
 		}
 
-		public override void Update()
+		public void OnPopulateMesh(VertexBuffer vb)
 		{
-			if (_requireUpdateMesh)
-			{
-				_requireUpdateMesh = false;
-				if (_rects != null && _rects.Count > 0)
-				{
-					int count = _rects.Count * 4;
-					graphics.Alloc(count);
-					Rectangle uvRect = new Rectangle(0, 0, 1, 1);
-					for (int i = 0; i < count; i += 4)
-					{
-						graphics.FillVerts(i, _rects[i / 4]);
-						graphics.FillUV(i, uvRect);
-					}
-					graphics.FillColors(_color);
-					graphics.FillTriangles();
-					graphics.UpdateMesh();
-				}
-				else
-					graphics.ClearMesh();
-			}
+			int count = rects.Count;
+			if (count == 0)
+				return;
 
-			base.Update();
+			for (int i = 0; i < count; i++)
+				vb.AddQuad(rects[i]);
+			vb.AddTriangles();
 		}
 
 		protected override DisplayObject HitTest()
 		{
-			if (_rects == null)
-				return null;
-
-			int count = _rects.Count;
-			if (count == 0)
-				return null;
-
 			Vector2 localPoint = GlobalToLocal(HitTestContext.screenPoint);
-			if (!_contentRect.Contains(localPoint.X, localPoint.Y))
-				return null;
 
-			for (int i = 0; i < count; i++)
+			if (_contentRect.Contains(localPoint.X, localPoint.Y))
 			{
-				if (_rects[i].Contains(localPoint.X, localPoint.Y))
-					return this;
+				int count = rects.Count;
+				for (int i = 0; i < count; i++)
+				{
+					if (rects[i].Contains(localPoint.X, localPoint.Y))
+						return this;
+				}
 			}
 
 			return null;

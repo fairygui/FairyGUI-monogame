@@ -75,7 +75,6 @@ namespace FairyGUI
 		protected bool _cacheAsBitmap;
 
 		protected Rectangle _contentRect;
-		protected bool _requireUpdateMesh;
 		protected bool _outlineChanged;
 
 		protected Matrix _localToWorldMatrix;
@@ -390,7 +389,7 @@ namespace FairyGUI
 			ApplyPivot();
 			_paintingFlag = 1;
 			if (graphics != null)
-				_requireUpdateMesh = true;
+				graphics.contentRect = _contentRect;
 			_outlineChanged = true;
 		}
 
@@ -696,7 +695,6 @@ namespace FairyGUI
 			_paintingMode ^= requestorId;
 			if (_paintingMode == 0)
 			{
-				paintingGraphics.ClearMesh();
 				paintingGraphics.enabled = false;
 			}
 		}
@@ -928,6 +926,7 @@ namespace FairyGUI
 					//从优化考虑，决定使用绘画模式的容器都需要明确指定大小，而不是自动计算包围。这在UI使用上并没有问题，因为组件总是有固定大小的
 					int textureWidth = (int)Math.Round((float)_contentRect.Width + _paintingMargin.left + _paintingMargin.right);
 					int textureHeight = (int)Math.Round((float)_contentRect.Height + _paintingMargin.top + _paintingMargin.bottom);
+					paintingGraphics.contentRect = new Rectangle(-_paintingMargin.left, -_paintingMargin.top, textureWidth, textureHeight);
 					if (paintingTexture == null || paintingTexture.width != textureWidth || paintingTexture.height != textureHeight)
 					{
 						if (paintingTexture != null)
@@ -942,15 +941,6 @@ namespace FairyGUI
 							paintingTexture = null;
 						paintingGraphics.texture = paintingTexture;
 					}
-
-					if (paintingTexture != null)
-					{
-						paintingGraphics.DrawRect(new Rectangle(-_paintingMargin.left, -_paintingMargin.top, paintingTexture.width, paintingTexture.height),
-							new Rectangle(0, 0, 1, 1), Color.White);
-						paintingGraphics.UpdateMesh();
-					}
-					else
-						paintingGraphics.ClearMesh();
 				}
 
 				if (paintingTexture != null)

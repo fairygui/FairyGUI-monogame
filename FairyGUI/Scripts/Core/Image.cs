@@ -11,29 +11,12 @@ namespace FairyGUI
 	/// <summary>
 	/// 
 	/// </summary>
-	public enum FlipType
+	public class Image : DisplayObject, IMeshFactory
 	{
-		None,
-		Horizontal,
-		Vertical,
-		Both
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public class Image : DisplayObject
-	{
-		protected NTexture _texture;
-		protected Color _color;
-		protected FlipType _flip;
 		protected Rectangle? _scale9Grid;
 		protected bool _scaleByTile;
 		protected int _tileGridIndice;
-		protected FillMethod _fillMethod;
-		protected int _fillOrigin;
-		protected float _fillAmount;
-		protected bool _fillClockwise;
+		protected FillMesh _fillMesh;
 
 		public Image() : this(null)
 		{
@@ -47,23 +30,16 @@ namespace FairyGUI
 		{
 			_touchDisabled = true;
 			graphics = new NGraphics();
+			graphics.meshFactory = this;
 
-			_color = Color.White;
 			if (texture != null)
 				UpdateTexture(texture);
 		}
 
-		void Create(NTexture texture)
-		{
-
-		}
-
-		/// <summary>
-		/// 
 		/// </summary>
 		public NTexture texture
 		{
-			get { return _texture; }
+			get { return graphics.texture; }
 			set
 			{
 				UpdateTexture(value);
@@ -75,27 +51,13 @@ namespace FairyGUI
 		/// </summary>
 		public Color color
 		{
-			get { return _color; }
-			set
+			get
 			{
-				_color = value;
-				_requireUpdateMesh = true;
+				return graphics.color;
 			}
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		public FlipType flip
-		{
-			get { return _flip; }
 			set
 			{
-				if (_flip != value)
-				{
-					_flip = value;
-					_requireUpdateMesh = true;
-				}
+				graphics.color = value;
 			}
 		}
 
@@ -104,13 +66,20 @@ namespace FairyGUI
 		/// </summary>
 		public FillMethod fillMethod
 		{
-			get { return _fillMethod; }
+			get { return _fillMesh != null ? _fillMesh.method : FillMethod.None; }
 			set
 			{
-				if (_fillMethod != value)
+				if (_fillMesh == null)
 				{
-					_fillMethod = value;
-					_requireUpdateMesh = true;
+					if (value == FillMethod.None)
+						return;
+
+					_fillMesh = new FillMesh();
+				}
+				if (_fillMesh.method != value)
+				{
+					_fillMesh.method = value;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
@@ -120,13 +89,16 @@ namespace FairyGUI
 		/// </summary>
 		public int fillOrigin
 		{
-			get { return _fillOrigin; }
+			get { return _fillMesh != null ? _fillMesh.origin : 0; }
 			set
 			{
-				if (_fillOrigin != value)
+				if (_fillMesh == null)
+					_fillMesh = new FillMesh();
+
+				if (_fillMesh.origin != value)
 				{
-					_fillOrigin = value;
-					_requireUpdateMesh = true;
+					_fillMesh.origin = value;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
@@ -136,13 +108,16 @@ namespace FairyGUI
 		/// </summary>
 		public bool fillClockwise
 		{
-			get { return _fillClockwise; }
+			get { return _fillMesh != null ? _fillMesh.clockwise : true; }
 			set
 			{
-				if (_fillClockwise != value)
+				if (_fillMesh == null)
+					_fillMesh = new FillMesh();
+
+				if (_fillMesh.clockwise != value)
 				{
-					_fillClockwise = value;
-					_requireUpdateMesh = true;
+					_fillMesh.clockwise = value;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
@@ -152,13 +127,13 @@ namespace FairyGUI
 		/// </summary>
 		public float fillAmount
 		{
-			get { return _fillAmount; }
+			get { return _fillMesh != null ? _fillMesh.amount : 0; }
 			set
 			{
-				if (_fillAmount != value)
+				if (_fillMesh.amount != value)
 				{
-					_fillAmount = value;
-					_requireUpdateMesh = true;
+					_fillMesh.amount = value;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
@@ -171,11 +146,11 @@ namespace FairyGUI
 			get { return _scale9Grid; }
 			set
 			{
-				if (_scale9Grid == null && value == null)
-					return;
-
-				_scale9Grid = value;
-				_requireUpdateMesh = true;
+				if (_scale9Grid != value)
+				{
+					_scale9Grid = value;
+					graphics.SetMeshDirty();
+				}
 			}
 		}
 
@@ -190,11 +165,14 @@ namespace FairyGUI
 				if (_scaleByTile != value)
 				{
 					_scaleByTile = value;
-					_requireUpdateMesh = true;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public int tileGridIndice
 		{
 			get { return _tileGridIndice; }
@@ -203,7 +181,7 @@ namespace FairyGUI
 				if (_tileGridIndice != value)
 				{
 					_tileGridIndice = value;
-					_requireUpdateMesh = true;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
@@ -213,41 +191,70 @@ namespace FairyGUI
 		/// </summary>
 		public void SetNativeSize()
 		{
-			float oldWidth = _contentRect.Width;
-			float oldHeight = _contentRect.Height;
-			if (_texture != null)
-			{
-				_contentRect.Width = _texture.width;
-				_contentRect.Height = _texture.height;
-			}
+			if (graphics.texture != null)
+				SetSize(graphics.texture.width, graphics.texture.height);
 			else
-			{
-				_contentRect.Width = 0;
-				_contentRect.Height = 0;
-			}
-			if (oldWidth != _contentRect.Width || oldHeight != _contentRect.Height)
-				OnSizeChanged(true, true);
-		}
-
-		public override void Update()
-		{
-			if (_requireUpdateMesh)
-				Rebuild();
-
-			base.Update();
+				SetSize(0, 0);
 		}
 
 		virtual protected void UpdateTexture(NTexture value)
 		{
-			if (value == _texture)
+			if (value == graphics.texture)
 				return;
 
-			_requireUpdateMesh = true;
-			_texture = value;
+			graphics.texture = value;
 			if (_contentRect.Width == 0)
 				SetNativeSize();
-			graphics.texture = _texture;
 		}
+
+		public void OnPopulateMesh(VertexBuffer vb)
+		{
+			if (_fillMesh != null && _fillMesh.method != FillMethod.None)
+			{
+				_fillMesh.OnPopulateMesh(vb);
+			}
+			else if (_scaleByTile)
+			{
+				float sourceW = texture.width;
+				float sourceH = texture.height;
+
+				//if (texture.root == texture
+				//			&& texture.nativeTexture != null
+				//			&& texture.nativeTexture.wrapMode == TextureWrapMode.Repeat)
+				//{
+				//	Rectangle uvRect = vb.uvRect;
+				//	uvRect.Width *= vb.contentRect.Width / sourceW;
+				//	uvRect.Height *= vb.contentRect.Height / sourceH;
+
+				//	vb.AddQuad(vb.contentRect, vb.vertexColor, uvRect);
+				//	vb.AddTriangles();
+				//}
+				//else
+				{
+					TileFill(vb, vb.contentRect, vb.uvRect, sourceW, sourceH);
+					vb.AddTriangles();
+				}
+			}
+			else if (_scale9Grid != null)
+			{
+				SliceFill(vb);
+			}
+			else
+				graphics.OnPopulateMesh(vb);
+		}
+
+		static int[] TRIANGLES_9_GRID = new int[] {
+			4,0,1,1,5,4,
+			5,1,2,2,6,5,
+			6,2,3,3,7,6,
+			8,4,5,5,9,8,
+			9,5,6,6,10,9,
+			10,6,7,7,11,10,
+			12,8,9,9,13,12,
+			13,9,10,10,14,13,
+			14,10,11,
+			11,15,14
+		};
 
 		static int[] gridTileIndice = new int[] { -1, 0, -1, 2, 4, 3, -1, 1, -1 };
 		static float[] gridX = new float[4];
@@ -255,218 +262,127 @@ namespace FairyGUI
 		static float[] gridTexX = new float[4];
 		static float[] gridTexY = new float[4];
 
-		void GenerateGrids(Rectangle gridRect, Rectangle uvRect)
+		public void SliceFill(VertexBuffer vb)
 		{
-			float sx = uvRect.Width / (float)_texture.width;
-			float sy = uvRect.Height / (float)_texture.height;
+			Rectangle gridRect = (Rectangle)_scale9Grid;
+			Rectangle contentRect = vb.contentRect;
+			Rectangle uvRect = vb.uvRect;
+
+			float sourceW = texture.width;
+			float sourceH = texture.height;
+			float sx = uvRect.Width / sourceW;
+			float sy = uvRect.Height / sourceH;
+			float xMax = uvRect.Right;
+			float yMax = uvRect.Bottom;
+			float xMax2 = gridRect.Right;
+			float yMax2 = gridRect.Bottom;
+
 			gridTexX[0] = uvRect.X;
 			gridTexX[1] = uvRect.X + gridRect.X * sx;
-			gridTexX[2] = uvRect.X + (gridRect.X + gridRect.Width) * sx;
-			gridTexX[3] = uvRect.X + uvRect.Width;
-			gridTexY[0] = uvRect.Y;
-			gridTexY[1] = uvRect.Y + gridRect.Y * sy;
-			gridTexY[2] = uvRect.Y + (gridRect.Y + gridRect.Height) * sy;
-			gridTexY[3] = uvRect.Y + uvRect.Height;
+			gridTexX[2] = uvRect.X + xMax2 * sx;
+			gridTexX[3] = xMax;
+			gridTexY[0] = yMax;
+			gridTexY[1] = yMax - gridRect.Y * sy;
+			gridTexY[2] = yMax - yMax2 * sy;
+			gridTexY[3] = uvRect.Y;
 
-			if (_contentRect.Width >= (_texture.width - gridRect.Width))
+			if (contentRect.Width >= (sourceW - gridRect.Width))
 			{
 				gridX[1] = gridRect.X;
-				gridX[2] = _contentRect.Width - (_texture.width - (gridRect.X + gridRect.Width));
-				gridX[3] = _contentRect.Width;
+				gridX[2] = contentRect.Width - (sourceW - xMax2);
+				gridX[3] = contentRect.Width;
 			}
 			else
 			{
-				float tmp = gridRect.X / (_texture.width - (gridRect.X + gridRect.Width));
-				tmp = _contentRect.Width * tmp / (1 + tmp);
+				float tmp = gridRect.X / (sourceW - xMax2);
+				tmp = contentRect.Width * tmp / (1 + tmp);
 				gridX[1] = tmp;
 				gridX[2] = tmp;
-				gridX[3] = _contentRect.Width;
+				gridX[3] = contentRect.Width;
 			}
 
-			if (_contentRect.Height >= (_texture.height - gridRect.Height))
+			if (contentRect.Height >= (sourceH - gridRect.Height))
 			{
 				gridY[1] = gridRect.Y;
-				gridY[2] = _contentRect.Height - (_texture.height - (gridRect.Y + gridRect.Height));
-				gridY[3] = _contentRect.Height;
+				gridY[2] = contentRect.Height - (sourceH - yMax2);
+				gridY[3] = contentRect.Height;
 			}
 			else
 			{
-				float tmp = gridRect.Y / (_texture.height - (gridRect.Y + gridRect.Height));
-				tmp = _contentRect.Height * tmp / (1 + tmp);
+				float tmp = gridRect.Y / (sourceH - yMax2);
+				tmp = contentRect.Height * tmp / (1 + tmp);
 				gridY[1] = tmp;
 				gridY[2] = tmp;
-				gridY[3] = _contentRect.Height;
+				gridY[3] = contentRect.Height;
+			}
+
+			if (_tileGridIndice == 0)
+			{
+				for (int cy = 0; cy < 4; cy++)
+				{
+					for (int cx = 0; cx < 4; cx++)
+						vb.AddVert(new Vector3(gridX[cx], gridY[cy], 0), vb.vertexColor, new Vector2(gridTexX[cx], gridTexY[cy]));
+				}
+				vb.AddTriangles(TRIANGLES_9_GRID);
+			}
+			else
+			{
+				Rectangle drawRect;
+				Rectangle texRect;
+				int row, col;
+				int part;
+
+				for (int pi = 0; pi < 9; pi++)
+				{
+					col = pi % 3;
+					row = pi / 3;
+					part = gridTileIndice[pi];
+					drawRect = Rectangle.FromLTRB(gridX[col], gridY[row], gridX[col + 1], gridY[row + 1]);
+					texRect = Rectangle.FromLTRB(gridTexX[col], gridTexY[row + 1], gridTexX[col + 1], gridTexY[row]);
+
+					if (part != -1 && (_tileGridIndice & (1 << part)) != 0)
+					{
+						TileFill(vb, drawRect, texRect,
+							(part == 0 || part == 1 || part == 4) ? gridRect.Width : drawRect.Width,
+							(part == 2 || part == 3 || part == 4) ? gridRect.Height : drawRect.Height);
+					}
+					else
+					{
+						vb.AddQuad(drawRect, vb.vertexColor, texRect);
+					}
+				}
+
+				vb.AddTriangles();
 			}
 		}
 
-		int TileFill(Rectangle destRect, Rectangle uvRect, float sourceW, float sourceH, int vertIndex)
+		void TileFill(VertexBuffer vb, Rectangle contentRect, Rectangle uvRect, float sourceW, float sourceH)
 		{
-			int hc = (int)Math.Ceiling(destRect.Width / sourceW);
-			int vc = (int)Math.Ceiling(destRect.Height / sourceH);
-			float tailWidth = destRect.Width - (hc - 1) * sourceW;
-			float tailHeight = destRect.Height - (vc - 1) * sourceH;
-
-			if (vertIndex == -1)
-			{
-				graphics.Alloc(hc * vc * 4);
-				vertIndex = 0;
-			}
+			int hc = (int)Math.Ceiling(contentRect.Width / sourceW);
+			int vc = (int)Math.Ceiling(contentRect.Height / sourceH);
+			float tailWidth = contentRect.Width - (hc - 1) * sourceW;
+			float tailHeight = contentRect.Height - (vc - 1) * sourceH;
+			float xMax = uvRect.Right;
+			float yMax = uvRect.Bottom;
 
 			for (int i = 0; i < hc; i++)
 			{
 				for (int j = 0; j < vc; j++)
 				{
-					graphics.FillVerts(vertIndex, new Rectangle(destRect.X + i * sourceW, destRect.Y + j * sourceH,
-							i == (hc - 1) ? tailWidth : sourceW, j == (vc - 1) ? tailHeight : sourceH));
 					Rectangle uvTmp = uvRect;
 					if (i == hc - 1)
-						uvTmp.Width = MathHelper.Lerp(uvRect.X, uvRect.Right, tailWidth / sourceW) - uvTmp.X;
+						uvTmp.Width = MathHelper.Lerp(uvRect.X, xMax, tailWidth / sourceW) - uvTmp.X;
 					if (j == vc - 1)
-						uvTmp.Height = MathHelper.Lerp(uvRect.Y, uvRect.Bottom, tailHeight / sourceH) - uvTmp.Y;
-
-					graphics.FillUV(vertIndex, uvTmp);
-					vertIndex += 4;
-				}
-			}
-
-			return vertIndex;
-		}
-
-		virtual protected void Rebuild()
-		{
-			_requireUpdateMesh = false;
-			if (_texture == null)
-			{
-				graphics.ClearMesh();
-				return;
-			}
-
-			Rectangle uvRect = _texture.uvRect;
-			if (_flip != FlipType.None)
-				ToolSet.FlipRect(ref uvRect, _flip);
-
-			if (_fillMethod != FillMethod.None)
-			{
-				graphics.DrawRectWithFillMethod(_contentRect, uvRect, _color, _fillMethod, _fillAmount, _fillOrigin, _fillClockwise);
-			}
-			else if (_texture.width == _contentRect.Width && _texture.height == _contentRect.Height)
-			{
-				graphics.DrawRect(_contentRect, uvRect, _color);
-			}
-			else if (_scaleByTile)
-			{
-				//如果纹理是repeat模式，而且单独占满一张纹理，那么可以用repeat的模式优化显示
-				/*if (_texture.nativeTexture != null && _texture.nativeTexture.wrapMode == TextureWrapMode.Repeat
-					&& uvRect.X == 0 && uvRect.Y == 0 && uvRect.Width == 1 && uvRect.Height == 1)
-				{
-					uvRect.Width *= _contentRect.Width / _texture.width;
-					uvRect.Height *= _contentRect.Height / _texture.height;
-					graphics.DrawRect(_contentRect, uvRect, _color);
-				}
-				else*/
-				{
-					TileFill(_contentRect, uvRect, _texture.width, _texture.height, -1);
-					graphics.FillColors(_color);
-					graphics.FillTriangles();
-				}
-			}
-			else if (_scale9Grid != null)
-			{
-				Rectangle gridRect = (Rectangle)_scale9Grid;
-
-				if (_flip != FlipType.None)
-					ToolSet.FlipInnerRect(_texture.width, _texture.height, ref gridRect, _flip);
-
-				GenerateGrids(gridRect, uvRect);
-
-				if (_tileGridIndice == 0)
-				{
-					graphics.Alloc(16);
-
-					int k = 0;
-					for (int cy = 0; cy < 4; cy++)
 					{
-						for (int cx = 0; cx < 4; cx++)
-						{
-							graphics.uv[k] = new Vector2(gridTexX[cx], gridTexY[cy]);
-							graphics.vertices[k] = new Vector3(gridX[cx], gridY[cy], 0);
-							k++;
-						}
-					}
-					graphics.FillTriangles(NGraphics.TRIANGLES_9_GRID);
-				}
-				else
-				{
-					int hc, vc;
-					Rectangle drawRect;
-					Rectangle texRect;
-					int row, col;
-					int part;
-
-					//先计算需要的顶点数量
-					int vertCount = 0;
-					for (int pi = 0; pi < 9; pi++)
-					{
-						col = pi % 3;
-						row = pi / 3;
-						part = gridTileIndice[pi];
-
-						if (part != -1 && (_tileGridIndice & (1 << part)) != 0)
-						{
-							if (part == 0 || part == 1 || part == 4)
-								hc = (int)Math.Ceiling((gridX[col + 1] - gridX[col]) / gridRect.Width);
-							else
-								hc = 1;
-							if (part == 2 || part == 3 || part == 4)
-								vc = (int)Math.Ceiling((gridY[row + 1] - gridY[row]) / gridRect.Height);
-							else
-								vc = 1;
-							vertCount += hc * vc * 4;
-						}
-						else
-							vertCount += 4;
+						float tmp = MathHelper.Lerp(uvRect.Y, yMax, 1 - tailHeight / sourceH);
+						uvTmp.Height -= (tmp - uvTmp.Y);
+						uvTmp.Y = tmp;
 					}
 
-					graphics.Alloc(vertCount);
-
-					int k = 0;
-
-					for (int pi = 0; pi < 9; pi++)
-					{
-						col = pi % 3;
-						row = pi / 3;
-						part = gridTileIndice[pi];
-						drawRect = new Rectangle(gridX[col], gridY[row], gridX[col + 1] - gridX[col], gridY[row + 1] - gridY[row]);
-						texRect = new Rectangle(gridTexX[col], gridTexY[row], gridTexX[col + 1] - gridTexX[col], gridTexY[row + 1] - gridTexY[row]);
-
-						if (part != -1 && (_tileGridIndice & (1 << part)) != 0)
-						{
-							k = TileFill(drawRect, texRect,
-								(part == 0 || part == 1 || part == 4) ? gridRect.Width : drawRect.Width,
-								(part == 2 || part == 3 || part == 4) ? gridRect.Height : drawRect.Height,
-								k);
-						}
-						else
-						{
-							graphics.FillVerts(k, drawRect);
-							graphics.FillUV(k, texRect);
-							k += 4;
-						}
-					}
-
-					graphics.FillTriangles();
+					vb.AddQuad(new Rectangle(contentRect.X + i * sourceW, contentRect.Y + j * sourceH,
+							i == (hc - 1) ? tailWidth : sourceW, j == (vc - 1) ? tailHeight : sourceH), vb.vertexColor, uvTmp);
 				}
-
-				graphics.FillColors(_color);
 			}
-			else
-			{
-				graphics.DrawRect(_contentRect, uvRect, _color);
-			}
-
-			if (_texture.rotated)
-				NGraphics.RotateUV(graphics.uv, ref uvRect);
-			graphics.UpdateMesh();
 		}
 	}
 }

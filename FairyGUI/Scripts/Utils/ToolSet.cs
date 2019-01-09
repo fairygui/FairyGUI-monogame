@@ -336,5 +336,28 @@ namespace FairyGUI.Utils
 
 			return matrix;
 		}
+
+		public static void RotateUV(Vector2[] uv, ref Rectangle baseUVRect)
+		{
+			int vertCount = uv.Length;
+			float X = MathHelper.Min(baseUVRect.X, baseUVRect.Right);
+			float Y = baseUVRect.Y;
+			float Bottom = baseUVRect.Bottom;
+			if (Y > Bottom)
+			{
+				Y = Bottom;
+				Bottom = baseUVRect.Y;
+			}
+
+			float tmp;
+			for (int i = 0; i < vertCount; i++)
+			{
+				Vector2 m = uv[i];
+				tmp = m.Y;
+				m.Y = Y + m.X - X;
+				m.X = X + Bottom - tmp;
+				uv[i] = m;
+			}
+		}
 	}
 }

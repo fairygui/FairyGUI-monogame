@@ -323,19 +323,6 @@ namespace FairyGUI
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public Rectangle contentRect
-		{
-			get { return _contentRect; }
-			set
-			{
-				_contentRect = value;
-				OnSizeChanged(true, true);
-			}
-		}
-
 		public override Rectangle GetBounds(DisplayObject targetSpace)
 		{
 			if (_clipRect != null)

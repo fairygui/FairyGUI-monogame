@@ -209,7 +209,10 @@ namespace FairyGUI
 			if (graphics.texture == null || !graphics.enabled)
 				return;
 
-			int vertCount = graphics.vertCount;
+			graphics.UpdateMesh();
+
+			List<Vector3> vertices = graphics._vertices;
+			int vertCount = vertices.Count;
 			if (vertCount == 0)
 				return;
 
@@ -248,11 +251,10 @@ namespace FairyGUI
 				filter.Apply(this);
 			}
 
-			Vector3[] vertices = graphics.vertices;
-			Vector2[] uv = graphics.uv;
-			Color[] colors = graphics.colors;
-			int[] triangles = graphics.triangles;
-			int indexCount = triangles.Length;
+			List<Vector2> uv = graphics._uv0;
+			List<Color> colors = graphics._colors;
+			List<int> triangles = graphics._triangles;
+			int indexCount = triangles.Count;
 
 			if (_vertexPtr + vertCount > _vertexCache.Length)
 			{
@@ -277,13 +279,16 @@ namespace FairyGUI
 
 			for (int i = 0; i < vertCount; i++)
 			{
-				Vector3.Transform(ref vertices[i], ref localToWorldMatrix, out vpct.Position);
+				Vector3 pt = vertices[i];
+				Vector3.Transform(ref pt, ref localToWorldMatrix, out vpct.Position);
 				if (_hasRenderTarget)
 				{
 					vpct.Position.X -= _renderOffset.X;
 					vpct.Position.Y -= _renderOffset.Y;
 				}
-				vpct.TextureCoordinate = uv[i];
+				Vector2 uvpt = uv[i];
+				uvpt.Y = 1 - uvpt.Y;
+				vpct.TextureCoordinate = uvpt;
 				vpct.Color = colors[i] * this.alpha * alpha;
 				_vertexCache[_vertexPtr++] = vpct;
 			}

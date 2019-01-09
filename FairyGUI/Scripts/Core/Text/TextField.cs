@@ -17,7 +17,7 @@ namespace FairyGUI
 	/// <summary>
 	/// 
 	/// </summary>
-	public class TextField : DisplayObject
+	public class TextField : DisplayObject, IMeshFactory
 	{
 		VertAlignType _verticalAlign;
 		TextFormat _textFormat;
@@ -79,6 +79,7 @@ namespace FairyGUI
 
 			graphics = new NGraphics();
 			graphics.pixelSnapping = true;
+			graphics.meshFactory = this;
 		}
 
 		public override void Dispose()
@@ -235,7 +236,7 @@ namespace FairyGUI
 				if (_stroke != value)
 				{
 					_stroke = value;
-					_requireUpdateMesh = true;
+					graphics.SetMeshDirty();
 				}
 			}
 		}
@@ -252,7 +253,7 @@ namespace FairyGUI
 			set
 			{
 				_strokeColor = value;
-				_requireUpdateMesh = true;
+				graphics.SetMeshDirty();
 			}
 		}
 
@@ -268,7 +269,7 @@ namespace FairyGUI
 			set
 			{
 				_shadowOffset = value;
-				_requireUpdateMesh = true;
+				graphics.SetMeshDirty();
 			}
 		}
 
@@ -345,8 +346,7 @@ namespace FairyGUI
 				if (_textChanged)
 					BuildLines();
 
-				if (_requireUpdateMesh)
-					BuildMesh();
+				graphics.UpdateMesh();
 
 				return _charPositions;
 			}
@@ -368,13 +368,7 @@ namespace FairyGUI
 			if (_textChanged)
 				BuildLines();
 
-			if (_requireUpdateMesh)
-			{
-				BuildMesh();
-				return true;
-			}
-			else
-				return false;
+			return graphics.UpdateMesh();
 		}
 
 		/// <summary>
@@ -446,7 +440,7 @@ namespace FairyGUI
 				if (_wordWrap && widthChanged)
 					_textChanged = true;
 				else if (_autoSize != AutoSizeType.None)
-					_requireUpdateMesh = true;
+					graphics.SetMeshDirty();
 
 				if (_verticalAlign != VertAlignType.Top)
 					ApplyVertAlign();
@@ -487,7 +481,7 @@ namespace FairyGUI
 		void BuildLines()
 		{
 			_textChanged = false;
-			_requireUpdateMesh = true;
+			graphics.SetMeshDirty();
 			_globalScale = UIContentScaler.scaleFactor;
 
 			if (_font == null)
@@ -896,22 +890,45 @@ namespace FairyGUI
 
 			_yOffset = 0;
 			ApplyVertAlign();
+
+			if (_font is DynamicFont)
+			{
+				if (_textWidth > 0 && _textHeight > 0)
+				{
+					int canvasWidth = 0, canvasHeight = 0;
+					canvasWidth = (int)Math.Ceiling(Math.Max(_textWidth, _contentRect.Width) * _globalScale);
+					canvasHeight = (int)Math.Ceiling(Math.Max(_textHeight, _contentRect.Height) * _globalScale);
+					if (_canvas == null || _canvas.Width < canvasWidth || _canvas.Height < canvasHeight)
+					{
+						if (_canvas != null)
+							_canvas.Dispose();
+
+						_canvas = new Bitmap(canvasWidth, canvasHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+						if (_texture != null)
+							_texture.Dispose();
+
+						_texture = new NTexture(new Texture2D(Stage.game.GraphicsDevice, _canvas.Width, _canvas.Height, false, SurfaceFormat.Color));
+						graphics.texture = _texture;
+					}
+				}
+				else if (_texture == null)
+				{
+					if (_charPositions != null)
+					{
+						_charPositions.Clear();
+						_charPositions.Add(new CharPosition());
+					}
+
+					if (_richTextField != null)
+						_richTextField.RefreshObjects();
+				}
+			}
 		}
 
-		static List<Vector3> sCachedVerts = new List<Vector3>();
-		static List<Vector2> sCachedUVs = new List<Vector2>();
-		static List<Color> sCachedCols = new List<Color>();
-		static GlyphInfo glyph = new GlyphInfo();
-		static GlyphInfo glyph2 = new GlyphInfo();
-
-		void BuildMesh()
+		public void OnPopulateMesh(VertexBuffer vb)
 		{
-			_requireUpdateMesh = false;
-
 			if (_textWidth == 0 && _lines.Count == 1)
 			{
-				graphics.ClearMesh();
-
 				if (_charPositions != null)
 				{
 					_charPositions.Clear();
@@ -925,15 +942,15 @@ namespace FairyGUI
 			}
 
 			if (_font is DynamicFont)
-				BuildMesh_systemFont();
+				BuildMesh_systemFont(vb);
 			else
-				BuildMesh_bitmapFont();
+				BuildMesh_bitmapFont(vb);
 
 			if (_richTextField != null)
 				_richTextField.RefreshObjects();
 		}
 
-		void BuildMesh_systemFont()
+		void BuildMesh_systemFont(VertexBuffer vb)
 		{
 			int letterSpacing = _textFormat.letterSpacing;
 			float rectWidth = _contentRect.Width - GUTTER_X * 2;
@@ -963,21 +980,7 @@ namespace FairyGUI
 			SolidBrush shadowBrush = null;
 			Pen outlinePen = null;
 			GraphicsPath outlinePath = null;
-			int canvasWidth = 0, canvasHeight = 0;
-			canvasWidth = (int)Math.Ceiling(Math.Max(_textWidth, _contentRect.Width) * _globalScale);
-			canvasHeight = (int)Math.Ceiling(Math.Max(_textHeight, _contentRect.Height) * _globalScale);
-			if (_canvas == null || _canvas.Width < canvasWidth || _canvas.Height < canvasHeight)
-			{
-				if (_canvas != null)
-					_canvas.Dispose();
 
-				_canvas = new Bitmap(canvasWidth, canvasHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-				if (_texture != null)
-				{
-					_texture.Dispose();
-					_texture = null;
-				}
-			}
 			nativeGraphics = Graphics.FromImage(_canvas);
 			nativeGraphics.Clear(System.Drawing.Color.Transparent);
 			nativeGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
@@ -997,8 +1000,6 @@ namespace FairyGUI
 
 			if (_shadowOffset.X != 0 || _shadowOffset.Y != 0)
 				shadowBrush = new SolidBrush(ToolSet.ToSystemColor(ref _strokeColor));
-
-			graphics.ClearMesh();
 
 			int renderElementCount = _renderElements.Count;
 			int lastLineIndex = -1;
@@ -1166,21 +1167,19 @@ namespace FairyGUI
 				shadowBrush.Dispose();
 
 			byte[] data = _canvas.GetPixels();
-			if (_texture == null)
-			{
-				var texture = new Texture2D(Stage.game.GraphicsDevice, _canvas.Width, _canvas.Height, false, SurfaceFormat.Color);
-				texture.SetData(data);
-				_texture = new NTexture(texture);
-				graphics.texture = _texture;
-			}
-			else
-				_texture.nativeTexture.SetData(data);
-			graphics.DrawRect(new Rectangle(0, 0, canvasWidth / _globalScale, canvasHeight / _globalScale),
-				new Rectangle(0, 0, (float)canvasWidth / _canvas.Width, (float)canvasHeight / _canvas.Height), Color.White);
-			graphics.UpdateMesh();
+			_texture.nativeTexture.SetData(data);
+
+			int canvasWidth = 0, canvasHeight = 0;
+			canvasWidth = (int)Math.Ceiling(Math.Max(_textWidth, _contentRect.Width) * _globalScale);
+			canvasHeight = (int)Math.Ceiling(Math.Max(_textHeight, _contentRect.Height) * _globalScale);
+
+			float h = (float)canvasWidth / _canvas.Height;
+			vb.AddQuad(new Rectangle(0, 0, canvasWidth / _globalScale, canvasWidth / _globalScale), Color.White,
+				new Rectangle(0, 1 - h, (float)canvasWidth / _canvas.Width, h));
+			vb.AddTriangles();
 		}
 
-		void BuildMesh_bitmapFont()
+		void BuildMesh_bitmapFont(VertexBuffer vb)
 		{
 			int letterSpacing = _textFormat.letterSpacing;
 			float rectWidth = _contentRect.Width - GUTTER_X * 2;
@@ -1206,13 +1205,14 @@ namespace FairyGUI
 			float lastGlyphHeight = 0;
 			Vector3 v0 = Vector3.Zero, v1 = Vector3.Zero;
 			Vector2 u0, u1, u2, u3;
+			bool canTint = ((BitmapFont)_font).colorEnabled;
 
-			List<Vector3> vertList = sCachedVerts;
-			List<Vector2> uvList = sCachedUVs;
-			List<Color> colList = sCachedCols;
-			vertList.Clear();
-			uvList.Clear();
-			colList.Clear();
+			List<Vector3> vertList = vb.vertices;
+			List<Vector2> uvList = vb.uv0;
+			List<Color> colList = vb.colors;
+
+			GlyphInfo glyph = new GlyphInfo();
+			GlyphInfo lineGlyph = new GlyphInfo();
 
 			if (_canvas != null)
 			{
@@ -1224,8 +1224,6 @@ namespace FairyGUI
 				_texture.Dispose();
 				_texture = null;
 			}
-
-			graphics.ClearMesh();
 
 			int renderElementCount = _renderElements.Count;
 			int lastLineIndex = -1;
@@ -1327,7 +1325,7 @@ namespace FairyGUI
 							_charPositions.Add(cp);
 						}
 
-						if (((BitmapFont)_font).GetGlyph(ch, glyph))
+						if (((BitmapFont)_font).GetGlyph(ch, ref glyph))
 						{
 							if (lineClipped || clipped && (rectWidth < 7 || charX != (GUTTER_X + xIndent)) && charX + glyph.width > _contentRect.Width - GUTTER_X + 0.5f) //超出区域，剪裁
 							{
@@ -1343,14 +1341,14 @@ namespace FairyGUI
 							else
 								lastGlyphHeight = glyph.height;
 
-							v0.X = charX + glyph.vert.X;
-							v0.Y = line.y + yIndent + glyph.vert.Y;
-							v1.X = v0.X + glyph.vert.Width;
-							v1.Y = v0.Y + glyph.vert.Height;
-							u0 = glyph.uv[0];
-							u1 = glyph.uv[1];
-							u2 = glyph.uv[2];
-							u3 = glyph.uv[3];
+							v0.X = charX + glyph.vertMin.X;
+							v0.Y = line.y + yIndent + glyph.vertMin.Y;
+							v1.X = charX + glyph.vertMax.X;
+							v1.Y = line.y + yIndent + glyph.vertMax.Y;
+							u0 = glyph.uvBottomLeft;
+							u1 = glyph.uvTopLeft;
+							u2 = glyph.uvTopRight;
+							u3 = glyph.uvBottomRight;
 
 							uvList.Add(u0);
 							uvList.Add(u1);
@@ -1362,33 +1360,43 @@ namespace FairyGUI
 							vertList.Add(new Vector3(v1.X, v0.Y, 0));
 							vertList.Add(new Vector3(v1.X, v1.Y, 0));
 
-							colList.Add(color);
-							colList.Add(color);
-							colList.Add(color);
-							colList.Add(color);
+							if (canTint)
+							{
+								colList.Add(color);
+								colList.Add(color);
+								colList.Add(color);
+								colList.Add(color);
+							}
+							else
+							{
+								colList.Add(Color.White);
+								colList.Add(Color.White);
+								colList.Add(Color.White);
+								colList.Add(Color.White);
+							}
 
 							if (format.underline)
 							{
-								if (((BitmapFont)_font).GetGlyph('_', glyph2))
+								if (((BitmapFont)_font).GetGlyph('_', ref lineGlyph))
 								{
 									//取中点的UV
-									if (glyph2.uv[0].X != glyph2.uv[3].X)
-										u0.X = (glyph2.uv[0].X + glyph2.uv[3].X) * 0.5f;
+									if (lineGlyph.uvBottomLeft.X != lineGlyph.uvBottomRight.X)
+										u0.X = (lineGlyph.uvBottomLeft.X + lineGlyph.uvBottomRight.X) * 0.5f;
 									else
-										u0.X = (glyph2.uv[0].X + glyph2.uv[1].X) * 0.5f;
+										u0.X = (lineGlyph.uvBottomLeft.X + lineGlyph.uvTopLeft.X) * 0.5f;
 
-									if (glyph2.uv[0].Y != glyph2.uv[1].Y)
-										u0.Y = (glyph2.uv[0].Y + glyph2.uv[1].Y) * 0.5f;
+									if (lineGlyph.uvBottomLeft.Y != lineGlyph.uvTopLeft.Y)
+										u0.Y = (lineGlyph.uvBottomLeft.Y + lineGlyph.uvTopLeft.Y) * 0.5f;
 									else
-										u0.Y = (glyph2.uv[0].Y + glyph2.uv[3].Y) * 0.5f;
+										u0.Y = (lineGlyph.uvBottomLeft.Y + lineGlyph.uvBottomRight.Y) * 0.5f;
 
 									uvList.Add(u0);
 									uvList.Add(u0);
 									uvList.Add(u0);
 									uvList.Add(u0);
 
-									v0.Y = line.y + yIndent + glyph2.vert.Bottom - 1;
-									v1.Y = line.y + yIndent + glyph2.vert.Y - 1;
+									v0.Y = line.y + yIndent - lineGlyph.vertMin.Y + 1;
+									v1.Y = line.y + yIndent - lineGlyph.vertMax.Y + 1;
 									if (v0.Y - v1.Y > 2)
 										v0.Y = v1.Y + 2;
 
@@ -1399,10 +1407,20 @@ namespace FairyGUI
 									vertList.Add(new Vector3(tmpX, v1.Y, 0));
 									vertList.Add(new Vector3(tmpX, v0.Y, 0));
 
-									colList.Add(color);
-									colList.Add(color);
-									colList.Add(color);
-									colList.Add(color);
+									if (canTint)
+									{
+										colList.Add(color);
+										colList.Add(color);
+										colList.Add(color);
+										colList.Add(color);
+									}
+									else
+									{
+										colList.Add(Color.White);
+										colList.Add(Color.White);
+										colList.Add(Color.White);
+										colList.Add(Color.White);
+									}
 								}
 								else
 									format.underline = false;
@@ -1436,40 +1454,28 @@ namespace FairyGUI
 				_charPositions.Add(cp);
 			}
 
+			int count = vertList.Count;
 			bool hasShadow = _shadowOffset.X != 0 || _shadowOffset.Y != 0;
-			if (_stroke != 0 || hasShadow)
+			int allocCount = count;
+			int drawDirs = 0;
+			if (_stroke != 0)
 			{
-				int count = vertList.Count;
-				int allocCount = count;
-				int drawDirs = 8;
-				if (_stroke != 0)
-					allocCount += count * drawDirs;
-				if (hasShadow)
-					allocCount += count;
-				graphics.Alloc(allocCount);
+				drawDirs = 4;
+				allocCount += count * drawDirs;
+			}
+			if (hasShadow)
+				allocCount += count;
 
-				Vector3[] vertBuf = graphics.vertices;
-				Vector2[] uvBuf = graphics.uv;
-				Color[] colBuf = graphics.colors;
-
-				int start = allocCount - count;
-				vertList.CopyTo(0, vertBuf, start, count);
-				uvList.CopyTo(0, uvBuf, start, count);
-				if (((BitmapFont)_font).colorEnabled)
-				{
-					for (int i = 0; i < count; i++)
-						colBuf[start + i] = colList[i];
-				}
-				else
-				{
-					for (int i = 0; i < count; i++)
-						colBuf[start + i] = Color.White;
-				}
+			if (allocCount != count)
+			{
+				VertexBuffer vb2 = VertexBuffer.Begin();
+				List<Vector3> vertList2 = vb2.vertices;
+				List<Vector2> uvList2 = vb2.uv0;
+				List<Color> colList2 = vb2.colors;
 
 				Color strokeColor = _strokeColor;
 				if (_stroke != 0)
 				{
-					start = allocCount - count * (drawDirs + 1);
 					for (int j = 0; j < drawDirs; j++)
 					{
 						for (int i = 0; i < count; i++)
@@ -1477,10 +1483,9 @@ namespace FairyGUI
 							Vector3 vert = vertList[i];
 							Vector2 u = uvList[i];
 
-							uvBuf[start] = u;
-							vertBuf[start] = new Vector3(vert.X + STROKE_OFFSET[j * 2] * _stroke, vert.Y + STROKE_OFFSET[j * 2 + 1] * _stroke, 0);
-							colBuf[start] = strokeColor;
-							start++;
+							uvList2.Add(u);
+							vertList2.Add(new Vector3(vert.X + STROKE_OFFSET[j * 2] * _stroke, vert.Y + STROKE_OFFSET[j * 2 + 1] * _stroke, 0));
+							colList2.Add(strokeColor);
 						}
 					}
 				}
@@ -1492,34 +1497,17 @@ namespace FairyGUI
 						Vector3 vert = vertList[i];
 						Vector2 u = uvList[i];
 
-
-						uvBuf[i] = u;
-						vertBuf[i] = new Vector3(vert.X + _shadowOffset.X, vert.Y - _shadowOffset.Y, 0);
-						colBuf[i] = strokeColor;
+						uvList2.Add(u);
+						vertList2.Add(new Vector3(vert.X + _shadowOffset.X, vert.Y - _shadowOffset.Y, 0));
+						colList2.Add(strokeColor);
 					}
 				}
-			}
-			else
-			{
-				int count = vertList.Count;
-				graphics.Alloc(count);
-				vertList.CopyTo(0, graphics.vertices, 0, count);
-				uvList.CopyTo(0, graphics.uv, 0, count);
-				Color[] colors = graphics.colors;
-				if (((BitmapFont)_font).colorEnabled)
-				{
-					for (int i = 0; i < count; i++)
-						colors[i] = colList[i];
-				}
-				else
-				{
-					for (int i = 0; i < count; i++)
-						colors[i] = Color.White;
-				}
+
+				vb.Insert(vb2);
+				vb2.End();
 			}
 
-			graphics.FillTriangles();
-			graphics.UpdateMesh();
+			vb.AddTriangles();
 		}
 
 		void Cleanup()
@@ -1563,7 +1551,8 @@ namespace FairyGUI
 				int cnt = _lines.Count;
 				for (int i = 0; i < cnt; i++)
 					_lines[i].y = _lines[i].y2 + _yOffset;
-				_requireUpdateMesh = true;
+
+				graphics.SetMeshDirty();
 			}
 		}
 

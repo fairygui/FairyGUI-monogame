@@ -17,7 +17,6 @@ namespace FairyGUI
 
 		public GMovieClip()
 		{
-			_sizeImplType = 1;
 		}
 
 		override protected void CreateDisplayObject()
@@ -80,8 +79,8 @@ namespace FairyGUI
 		/// </summary>
 		public FlipType flip
 		{
-			get { return _content.flip; }
-			set { _content.flip = value; }
+			get { return _content.graphics.flip; }
+			set { _content.graphics.flip = value; }
 		}
 
 		/// <summary>
@@ -153,7 +152,7 @@ namespace FairyGUI
 			_content.interval = packageItem.interval;
 			_content.swing = packageItem.swing;
 			_content.repeatDelay = packageItem.repeatDelay;
-			_content.SetData(packageItem.texture, packageItem.frames, new Rectangle(0, 0, sourceWidth, sourceHeight));
+			_content.frames = packageItem.frames;
 
 			SetSize(sourceWidth, sourceHeight);
 		}
@@ -166,7 +165,7 @@ namespace FairyGUI
 
 			if (buffer.ReadBool())
 				_content.color = buffer.ReadColor();
-			_content.flip = (FlipType)buffer.ReadByte();
+			_content.graphics.flip = (FlipType)buffer.ReadByte();
 			_content.frame = buffer.ReadInt();
 			_content.playing = buffer.ReadBool();
 		}

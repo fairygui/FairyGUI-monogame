@@ -566,13 +566,9 @@ namespace FairyGUI
 			Vector2 v1 = GetCharLocation(start);
 			Vector2 v2 = GetCharLocation(cp);
 
-			List<Rectangle> rects = _selectionShape.rects;
-			if (rects == null)
-				rects = new List<Rectangle>(2);
-			else
-				rects.Clear();
-			textField.GetLinesShape(start.lineIndex, v1.X - textField.x, cp.lineIndex, v2.X - textField.x, false, rects);
-			_selectionShape.rects = rects;
+			_selectionShape.rects.Clear();
+			textField.GetLinesShape(start.lineIndex, v1.X - textField.x, cp.lineIndex, v2.X - textField.x, false, _selectionShape.rects);
+			_selectionShape.Refresh();
 			_selectionShape.position = textField.position;
 		}
 

@@ -73,19 +73,15 @@ namespace FairyGUI.Utils
 
 		public void SetArea(int startLine, float startCharX, int endLine, float endCharX)
 		{
-			List<Rectangle> rects = _shape.rects;
-			if (rects == null)
-				rects = new List<Rectangle>(2);
-			else
-				rects.Clear();
 			if (startLine == endLine && startCharX > endCharX)
 			{
 				float tmp = startCharX;
 				startCharX = endCharX;
 				endCharX = tmp;
 			}
-			_owner.textField.GetLinesShape(startLine, startCharX, endLine, endCharX, true, rects);
-			_shape.rects = rects;
+			_shape.rects.Clear();
+			_owner.textField.GetLinesShape(startLine, startCharX, endLine, endCharX, true, _shape.rects);
+			_shape.Refresh();
 		}
 
 		public void SetPosition(float x, float y)
