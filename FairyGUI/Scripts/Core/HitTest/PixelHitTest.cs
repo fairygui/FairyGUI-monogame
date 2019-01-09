@@ -1,6 +1,9 @@
 ﻿using System;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
+#if Windows || DesktopGL
+using Rectangle = System.Drawing.RectangleF;
+#endif
 
 namespace FairyGUI
 {
@@ -32,8 +35,8 @@ namespace FairyGUI
 	{
 		public int offsetX;
 		public int offsetY;
-		public float scaleX;
-		public float scaleY;
+		public float sourceWidth;
+		public float sourceHeight;
 
 		PixelHitTestData _data;
 
@@ -43,26 +46,19 @@ namespace FairyGUI
 		/// <param name="data"></param>
 		/// <param name="offsetX"></param>
 		/// <param name="offsetY"></param>
-		public PixelHitTest(PixelHitTestData data, int offsetX, int offsetY)
+		public PixelHitTest(PixelHitTestData data, int offsetX, int offsetY, float sourceWidth, float sourceHeight)
 		{
 			_data = data;
 			this.offsetX = offsetX;
 			this.offsetY = offsetY;
-
-			scaleX = 1;
-			scaleY = 1;
+			this.sourceWidth = sourceWidth;
+			this.sourceHeight = sourceHeight;
 		}
 
-		public void SetEnabled(bool value)
+		public bool HitTest(Rectangle contentRect, Vector2 localPoint)
 		{
-		}
-
-		public bool HitTest(Container container, ref Vector2 localPoint)
-		{
-			localPoint = container.GlobalToLocal(HitTestContext.screenPoint);
-
-			int x = (int)Math.Floor((localPoint.X / scaleX - offsetX) * _data.scale);
-			int y = (int)Math.Floor((localPoint.Y / scaleY - offsetY) * _data.scale);
+			int x = (int)Math.Floor((localPoint.X * sourceWidth / contentRect.Width - offsetX) * _data.scale);
+			int y = (int)Math.Floor((localPoint.Y * sourceHeight / contentRect.Height - offsetY) * _data.scale);
 			if (x < 0 || y < 0 || x >= _data.pixelWidth)
 				return false;
 

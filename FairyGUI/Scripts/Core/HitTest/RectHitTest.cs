@@ -20,9 +20,8 @@ namespace FairyGUI
 		{
 		}
 
-		public bool HitTest(Container container, ref Vector2 localPoint)
+		public bool HitTest(Rectangle rect, Vector2 localPoint)
 		{
-			localPoint = container.GlobalToLocal(HitTestContext.screenPoint);
 			return rect.Contains(localPoint.X, localPoint.Y);
 		}
 	}

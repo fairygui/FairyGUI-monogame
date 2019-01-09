@@ -801,7 +801,7 @@ namespace FairyGUI
 
 		protected internal DisplayObject InternalHitTest()
 		{
-			if (!_visible || (HitTestContext.forTouch && (!_touchable || _touchDisabled)))
+			if (!_visible || HitTestContext.forTouch && !_touchable)
 				return null;
 
 			return HitTest();
@@ -971,7 +971,7 @@ namespace FairyGUI
 			{
 				if (graphics != null && paintingGraphics.texture != null)
 				{
-					batch.PushRenderTarget(paintingGraphics.texture, 
+					batch.PushRenderTarget(paintingGraphics.texture,
 						Vector2.Transform(Vector2.Zero, _localToWorldMatrix) + new Vector2(_paintingMargin.left, _paintingMargin.top));
 
 					batch.Draw(graphics, _alpha, _grayed, BlendMode.Normal, ref _localToWorldMatrix, null);

@@ -326,20 +326,6 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		override public bool touchable
-		{
-			get { return base.touchable; }
-			set
-			{
-				base.touchable = value;
-				if (hitArea != null)
-					hitArea.SetEnabled(value);
-			}
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
 		public Rectangle contentRect
 		{
 			get { return _contentRect; }
@@ -412,17 +398,16 @@ namespace FairyGUI
 			if (_scale.X == 0 || _scale.Y == 0)
 				return null;
 
-			Vector2 localPoint = new Vector2();
 			Vector2 savedScreenPoint = HitTestContext.screenPoint;
+			Vector2 localPoint = GlobalToLocal(HitTestContext.screenPoint);
 
 			if (hitArea != null)
 			{
-				if (!hitArea.HitTest(this, ref localPoint))
+				if (!hitArea.HitTest(_contentRect, localPoint))
 					return null;
 			}
 			else
 			{
-				localPoint = GlobalToLocal(HitTestContext.screenPoint);
 				if (_clipRect != null && !((Rectangle)_clipRect).Contains(localPoint.X, localPoint.Y))
 					return null;
 			}
@@ -434,7 +419,7 @@ namespace FairyGUI
 				for (int i = count - 1; i >= 0; --i) // front to back!
 				{
 					DisplayObject child = _children[i];
-					if (child == _mask)
+					if (child == _mask || child._touchDisabled)
 						continue;
 
 					target = child.InternalHitTest();
@@ -494,7 +479,7 @@ namespace FairyGUI
 
 			if (_paintingMode != 0 && paintingGraphics.texture != null)
 			{
-				batch.PushRenderTarget(paintingGraphics.texture, 
+				batch.PushRenderTarget(paintingGraphics.texture,
 					Vector2.Transform(Vector2.Zero, _localToWorldMatrix) + new Vector2(_paintingMargin.left, _paintingMargin.top));
 			}
 
