@@ -68,6 +68,7 @@
     <Compile Include="Scripts\Core\Mesh\FillMesh.cs" />
     <Compile Include="Scripts\Core\Mesh\LineMesh.cs" />
     <Compile Include="Scripts\Core\Mesh\MeshFactory.cs" />
+    <Compile Include="Scripts\Core\Mesh\PlaneMesh.cs" />
     <Compile Include="Scripts\Core\Mesh\PolygonMesh.cs" />
     <Compile Include="Scripts\Core\Mesh\RectMesh.cs" />
     <Compile Include="Scripts\Core\Mesh\RegularPolygonMesh.cs" />
