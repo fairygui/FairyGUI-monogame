@@ -42,11 +42,11 @@ namespace FairyGUI
 			switch (method)
 			{
 				case FillMethod.Horizontal:
-					FillHorizontal(vb, vb.contentRect, (OriginHorizontal)origin, amount);
+					FillHorizontal(vb, vb.contentRect, origin, amount);
 					break;
 
 				case FillMethod.Vertical:
-					FillVertical(vb, vb.contentRect, (OriginVertical)origin, amount);
+					FillVertical(vb, vb.contentRect, origin, amount);
 					break;
 
 				case FillMethod.Radial90:
@@ -63,10 +63,10 @@ namespace FairyGUI
 			}
 		}
 
-		static void FillHorizontal(VertexBuffer vb, Rectangle vertRect, OriginHorizontal origin, float amount)
+		static void FillHorizontal(VertexBuffer vb, Rectangle vertRect, int origin, float amount)
 		{
 			float a = vertRect.Width * amount;
-			if (origin == OriginHorizontal.Right)
+			if ((OriginHorizontal)origin == OriginHorizontal.Right || (OriginVertical)origin == OriginVertical.Bottom)
 				vertRect.X += (vertRect.Width - a);
 			vertRect.Width = a;
 
@@ -74,10 +74,10 @@ namespace FairyGUI
 			vb.AddTriangles();
 		}
 
-		static void FillVertical(VertexBuffer vb, Rectangle vertRect, OriginVertical origin, float amount)
+		static void FillVertical(VertexBuffer vb, Rectangle vertRect, int origin, float amount)
 		{
 			float a = vertRect.Height * amount;
-			if (origin == OriginVertical.Bottom)
+			if ((OriginHorizontal)origin == OriginHorizontal.Right || (OriginVertical)origin == OriginVertical.Bottom)
 				vertRect.Y += (vertRect.Height - a);
 			vertRect.Height = a;
 

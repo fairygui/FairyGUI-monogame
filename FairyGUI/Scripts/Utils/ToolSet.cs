@@ -64,35 +64,6 @@ namespace FairyGUI.Utils
 				return 0;
 		}
 
-		public static void FlipInnerRect(float sourceWidth, float sourceHeight, ref Rectangle rect, FlipType flip)
-		{
-			if (flip == FlipType.Horizontal || flip == FlipType.Both)
-			{
-				rect.X = sourceWidth - rect.X - rect.Width;
-			}
-
-			if (flip == FlipType.Vertical || flip == FlipType.Both)
-			{
-				rect.Y = sourceHeight - rect.Y - rect.Height;
-			}
-		}
-
-		public static void FlipRect(ref Rectangle rect, FlipType flip)
-		{
-			if (flip == FlipType.Horizontal || flip == FlipType.Both)
-			{
-				float tmp = rect.X;
-				rect.X = rect.X + rect.Width;
-				rect.Width = tmp - rect.X;
-			}
-			if (flip == FlipType.Vertical || flip == FlipType.Both)
-			{
-				float tmp = rect.Y;
-				rect.Y = rect.Y + rect.Height;
-				rect.Height = tmp - rect.Y;
-			}
-		}
-
 		public static Rectangle Intersection(ref Rectangle rect1, ref Rectangle rect2)
 		{
 			if (rect1.Width == 0 || rect1.Height == 0 || rect2.Width == 0 || rect2.Height == 0)

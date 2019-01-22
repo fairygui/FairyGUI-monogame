@@ -200,6 +200,21 @@ namespace FairyGUI
 			VertexBuffer vb = VertexBuffer.Begin();
 			vb.contentRect = _contentRect;
 			vb.uvRect = _texture.uvRect;
+			if (_flip != FlipType.None)
+			{
+				if (_flip == FlipType.Horizontal || _flip == FlipType.Both)
+				{
+					float tmp = vb.uvRect.X;
+					vb.uvRect.X = vb.uvRect.X + vb.uvRect.Width;
+					vb.uvRect.Width = tmp - vb.uvRect.X;
+				}
+				if (_flip == FlipType.Vertical || _flip == FlipType.Both)
+				{
+					float tmp = vb.uvRect.Y;
+					vb.uvRect.Y = vb.uvRect.Y + vb.uvRect.Height;
+					vb.uvRect.Height = tmp - vb.uvRect.Y;
+				}
+			}
 			vb.vertexColor = _color;
 			_meshFactory.OnPopulateMesh(vb);
 
@@ -218,25 +233,6 @@ namespace FairyGUI
 				}
 				vb.End();
 				return;
-			}
-
-			if (_flip != FlipType.None)
-			{
-				bool h = _flip == FlipType.Horizontal || _flip == FlipType.Both;
-				bool v = _flip == FlipType.Vertical || _flip == FlipType.Both;
-				float xMax = _contentRect.Right;
-				float yMax = _contentRect.Bottom;
-				for (int i = 0; i < vertCount; i++)
-				{
-					Vector3 vec = vb.vertices[i];
-					if (h)
-						vec.X = xMax - (vec.X - _contentRect.X);
-					if (v)
-						vec.Y = yMax - (vec.Y - _contentRect.Y);
-					vb.vertices[i] = vec;
-				}
-				if (!(h && v))
-					vb.triangles.Reverse();
 			}
 
 			if (_texture.rotated)

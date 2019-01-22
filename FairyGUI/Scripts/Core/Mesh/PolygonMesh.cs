@@ -12,9 +12,14 @@ namespace FairyGUI
 	public class PolygonMesh : IMeshFactory, IHitTest
 	{
 		/// <summary>
-		/// 
+		/// points must be in clockwise order, and must start from bottom-left if stretchUV is set.
 		/// </summary>
 		public readonly List<Vector2> points;
+
+		/// <summary>
+		/// if you dont want to provide uv, leave it empty.
+		/// </summary>
+		public readonly List<Vector2> texcoords;
 
 		/// <summary>
 		/// 
@@ -36,6 +41,27 @@ namespace FairyGUI
 		public PolygonMesh()
 		{
 			points = new List<Vector2>();
+			texcoords = new List<Vector2>();
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="point"></param>
+		public void Add(Vector2 point)
+		{
+			points.Add(point);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="point"></param>
+		/// <param name="texcoord"></param>
+		public void Add(Vector2 point, Vector2 texcoord)
+		{
+			points.Add(point);
+			texcoords.Add(texcoord);
 		}
 
 		public void OnPopulateMesh(VertexBuffer vb)
@@ -45,17 +71,28 @@ namespace FairyGUI
 				return;
 
 			int restIndexPos, numRestIndices;
-
 			Color color = fillColor != null ? (Color)fillColor : vb.vertexColor;
+
+			float w = vb.contentRect.Width;
+			float h = vb.contentRect.Height;
+			bool useTexcoords = texcoords.Count >= numVertices;
 			for (int i = 0; i < numVertices; i++)
 			{
 				Vector3 vec = new Vector3(points[i].X, points[i].Y, 0);
 				if (usePercentPositions)
 				{
-					vec.X *= vb.contentRect.Width;
-					vec.Y *= vb.contentRect.Height;
+					vec.X *= w;
+					vec.Y *= h;
 				}
-				vb.AddVert(vec, color);
+				if (useTexcoords)
+				{
+					Vector2 uv = texcoords[i];
+					uv.X = MathHelper.Lerp(vb.uvRect.X, vb.uvRect.Right, uv.X);
+					uv.Y = MathHelper.Lerp(vb.uvRect.X, vb.uvRect.Bottom, uv.Y);
+					vb.AddVert(vec, color, uv);
+				}
+				else
+					vb.AddVert(vec, color);
 			}
 
 			// Algorithm "Ear clipping method" described here:
@@ -162,6 +199,8 @@ namespace FairyGUI
 			int i;
 			int j = len - 1;
 			bool oddNodes = false;
+			float w = contentRect.Width;
+			float h = contentRect.Height;
 
 			for (i = 0; i < len; ++i)
 			{
@@ -169,6 +208,13 @@ namespace FairyGUI
 				float iy = points[i].Y;
 				float jx = points[j].X;
 				float jy = points[j].Y;
+				if (usePercentPositions)
+				{
+					ix *= w;
+					iy *= h;
+					ix *= w;
+					iy *= h;
+				}
 
 				if ((iy < point.Y && jy >= point.Y || jy < point.Y && iy >= point.Y) && (ix <= point.X || jx <= point.X))
 				{

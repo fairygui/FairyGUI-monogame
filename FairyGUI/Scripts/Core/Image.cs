@@ -270,6 +270,16 @@ namespace FairyGUI
 
 			float sourceW = texture.width;
 			float sourceH = texture.height;
+
+			if (graphics.flip != FlipType.None)
+			{
+				if (graphics.flip == FlipType.Horizontal || graphics.flip == FlipType.Both)
+					gridRect.X = sourceW - gridRect.Right;
+
+				if (graphics.flip == FlipType.Vertical || graphics.flip == FlipType.Both)
+					gridRect.Y = sourceH - gridRect.Bottom;
+			}
+
 			float sx = uvRect.Width / sourceW;
 			float sy = uvRect.Height / sourceH;
 			float xMax = uvRect.Right;
