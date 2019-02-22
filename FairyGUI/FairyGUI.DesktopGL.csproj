@@ -56,12 +56,22 @@
     <Compile Include="Scripts\Core\Container.cs" />
     <Compile Include="Scripts\Core\DisplayObject.cs" />
     <Compile Include="Scripts\Core\FairyBatch.cs" />
-    <Compile Include="Scripts\Core\FillUtils.cs" />
     <Compile Include="Scripts\Core\HitTest\HitTestContext.cs" />
     <Compile Include="Scripts\Core\HitTest\IHitTest.cs" />
     <Compile Include="Scripts\Core\HitTest\PixelHitTest.cs" />
     <Compile Include="Scripts\Core\HitTest\RectHitTest.cs" />
     <Compile Include="Scripts\Core\Image.cs" />
+    <Compile Include="Scripts\Core\Mesh\CompositeMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\EllipseMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\FillMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\LineMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\MeshFactory.cs" />
+    <Compile Include="Scripts\Core\Mesh\PlaneMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\PolygonMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\RectMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\RegularPolygonMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\RoundedRectMesh.cs" />
+    <Compile Include="Scripts\Core\Mesh\VertexBuffer.cs" />
     <Compile Include="Scripts\Core\MovieClip.cs" />
     <Compile Include="Scripts\Core\NGraphics.cs" />
     <Compile Include="Scripts\Core\NTexture.cs" />
@@ -88,6 +98,7 @@
     <Compile Include="Scripts\Filter\IFilter.cs" />
     <Compile Include="Scripts\Tween\EaseManager.cs" />
     <Compile Include="Scripts\Tween\EaseType.cs" />
+    <Compile Include="Scripts\Tween\GPath.cs" />
     <Compile Include="Scripts\Tween\GTween.cs" />
     <Compile Include="Scripts\Tween\GTweener.cs" />
     <Compile Include="Scripts\Tween\TweenManager.cs" />
@@ -189,7 +200,9 @@
       <Link>x86\soft_oal.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\FairyGUI.fx" />
+    <Content Include="Content\FairyGUI.fx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="C:\Program Files %28x86%29\MonoGame\v3.0\Assemblies\DesktopGL\libopenal.1.dylib">
