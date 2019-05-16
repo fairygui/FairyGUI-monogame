@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,9 +13,10 @@
     <AssemblyName>FairyGUI.Test</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MonoGamePlatform>DesktopGL</MonoGamePlatform>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -46,39 +47,20 @@
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenes\BagScene.cs" />
-    <Compile Include="Scenes\BagWindow.cs" />
-    <Compile Include="Scenes\BasicsScene.cs" />
-    <Compile Include="Scenes\ChatScene.cs" />
-    <Compile Include="Scenes\DemoScene.cs" />
-    <Compile Include="Scenes\EmojiParser.cs" />
-    <Compile Include="Scenes\HitTestScene.cs" />
-    <Compile Include="Scenes\JoystickModule.cs" />
-    <Compile Include="Scenes\JoystickScene.cs" />
-    <Compile Include="Scenes\ListEffectScene.cs" />
-    <Compile Include="Scenes\LoopListScene.cs" />
-    <Compile Include="Scenes\MailItem.cs" />
-    <Compile Include="Scenes\MenuScene.cs" />
-    <Compile Include="Scenes\ModalWaitingScene.cs" />
-    <Compile Include="Scenes\MyGLoader.cs" />
-    <Compile Include="Scenes\PullToRefreshScene.cs" />
-    <Compile Include="Scenes\ScrollPaneHeader.cs" />
-    <Compile Include="Scenes\ScrollPaneScene.cs" />
-    <Compile Include="Scenes\TransitionDemoScene.cs" />
-    <Compile Include="Scenes\TreeViewScene.cs" />
-    <Compile Include="Scenes\VirtualListScene.cs" />
-    <Compile Include="Scenes\Window1.cs" />
-    <Compile Include="Scenes\Window2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.7.1.189, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.7.1.189\lib\net45\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common">
+      <HintPath>..\packages\system.drawing.common\4.5.1\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing.Primitives" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\FairyGUI.fx" />
     <Content Include="Content\Icons\i0.png" />
     <Content Include="Content\Icons\i1.png" />
     <Content Include="Content\Icons\i2.png" />
@@ -112,6 +94,7 @@
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="app.manifest" />
     <MonoGameContentReference Include="Content\Content.DesktopGL.mgcb" />
     <None Include="Content\UI\Bag.fui" />
@@ -133,9 +116,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FairyGUI\FairyGUI.DesktopGL.csproj">
-      <Project>{4a5deb02-6f9b-4988-91c9-d1a03bce3608}</Project>
-      <Name>FairyGUI.DesktopGL</Name>
+    <ProjectReference Include="..\FairyGUI.Test.Scene\FairyGUI.Test.Scene.csproj">
+      <Project>{60ca75f9-79ba-4457-9ac3-950daa23822f}</Project>
+      <Name>FairyGUI.Test.Scene</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FairyGUI\FairyGUI.Core.csproj">
+      <Project>{74e59052-60a4-4f2c-acc6-63119199fb3c}</Project>
+      <Name>FairyGUI.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

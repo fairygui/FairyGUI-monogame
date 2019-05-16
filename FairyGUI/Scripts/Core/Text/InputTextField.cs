@@ -6,9 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using HtmlElement = FairyGUI.Utils.HtmlElement;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 #if Windows
 using System.Windows.Forms;

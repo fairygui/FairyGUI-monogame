@@ -4,13 +4,10 @@ using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
-
-#if Windows || DesktopGL
 using System.Drawing;
+using Rectangle = System.Drawing.RectangleF;
 using System.Drawing.Drawing2D;
 using Region = System.Drawing.Region;
-using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {
@@ -46,8 +43,8 @@ namespace FairyGUI
 		int _yOffset;
 		float _fontSizeScale;
 		float _globalScale;
-		Bitmap _canvas;
-		NTexture _texture;
+        Bitmap _canvas;
+        NTexture _texture;
 
 		RichTextField _richTextField;
 
@@ -86,11 +83,11 @@ namespace FairyGUI
 		{
 			base.Dispose();
 
-			if (_canvas != null)
+            if (_canvas != null)
 				_canvas.Dispose();
-		}
+        }
 
-		internal void EnableRichSupport(RichTextField richTextField)
+        internal void EnableRichSupport(RichTextField richTextField)
 		{
 			_richTextField = richTextField;
 			if (_richTextField is InputTextField)

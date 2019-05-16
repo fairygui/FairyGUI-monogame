@@ -13,6 +13,12 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin FairyGUI.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:FairyGUI.fx
+
 #begin Icons/i0.png
 /importer:TextureImporter
 /processor:TextureProcessor
