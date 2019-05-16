@@ -1,4 +1,6 @@
-﻿namespace FairyGUI.Test.Scenes
+﻿using Microsoft.Xna.Framework;
+
+namespace FairyGUI.Test.Scenes
 {
 	public class MailItem : GButton
 	{
@@ -10,7 +12,7 @@
 		protected override void OnConstruct()
 		{
 			_timeText = this.GetChild("timeText").asTextField;
-			_readController = this.GetController("IsRead");
+            _readController = this.GetController("IsRead");
 			_fetchController = this.GetController("c1");
 			_trans = this.GetTransition("t0");
 		}

@@ -2,7 +2,6 @@
 
 namespace FairyGUI.Test
 {
-#if WINDOWS || LINUX
     /// <summary>
     /// The main class.
     /// </summary>
@@ -18,5 +17,4 @@ namespace FairyGUI.Test
                 game.Run();
         }
     }
-#endif
 }

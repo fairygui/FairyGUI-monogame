@@ -63,6 +63,8 @@ namespace FairyGUI
 			get; set;
 		}
 
+        public static string candidataString { get; set; }
+
 
 		static IMEAdapter()
 		{

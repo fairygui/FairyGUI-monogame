@@ -94,6 +94,7 @@
       <HintPath>..\packages\system.drawing.common\4.5.1\lib\net461\System.Drawing.Common.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing.Primitives" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +153,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FairyGUI-IME\FairyGUI-IME.csproj">
+      <Project>{93194765-7328-49ed-9eb8-e6af29e1a7b5}</Project>
+      <Name>FairyGUI-IME</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FairyGUI.Test.Scene\FairyGUI.Test.Scene.csproj">
       <Project>{60ca75f9-79ba-4457-9ac3-950daa23822f}</Project>
       <Name>FairyGUI.Test.Scene</Name>

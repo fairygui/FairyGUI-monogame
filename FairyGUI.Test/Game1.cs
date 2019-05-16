@@ -1,8 +1,11 @@
-﻿using FairyGUI;
-using FairyGUI.Test.Scenes;
+﻿using FairyGUI.Test.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+#if WINDOWS
+using FairyGUI_IME;
+#endif
 
 namespace FairyGUI.Test
 {
@@ -14,7 +17,7 @@ namespace FairyGUI.Test
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 
-		public Game1()
+        public Game1()
 		{
 			graphics = new GraphicsDeviceManager(this);
 			Content.RootDirectory = "Content";
@@ -29,20 +32,24 @@ namespace FairyGUI.Test
 
 			IsMouseVisible = true;
 
-			this.Components.Add(new Stage(this));
-		}
+#if WINDOWS
+            this.Components.Add(new Stage(this, new WindowInputCapturer(this.Window.Handle, this)));
+#elif DesktopGL
+            this.Components.Add(new Stage(this, null));
+#endif
+        }
 
-		/// <summary>
-		/// Allows the game to perform any initialization it needs to before starting to run.
-		/// This is where it can query for any required services and load any non-graphic
-		/// related content.  Calling base.Initialize will enumerate through any components
-		/// and initialize them as well.
-		/// </summary>
-		protected override void Initialize()
+        /// <summary>
+        /// Allows the game to perform any initialization it needs to before starting to run.
+        /// This is where it can query for any required services and load any non-graphic
+        /// related content.  Calling base.Initialize will enumerate through any components
+        /// and initialize them as well.
+        /// </summary>
+        protected override void Initialize()
 		{
-			// TODO: Add your initialization logic here
+            // TODO: Add your initialization logic here
 
-			base.Initialize();
+            base.Initialize();
 		}
 
 		/// <summary>

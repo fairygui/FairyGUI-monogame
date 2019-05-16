@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
-
-#if Windows
-using FairyGUI.Scripts.Core.Text;
-#endif
 
 namespace FairyGUI
 {
@@ -71,26 +69,23 @@ namespace FairyGUI
 			get { return false; }
 		}
 
-#if Windows
-		public static IMEHandler handler;
-#endif
+        public IInputHandler _wic { get; }
 
+        public static readonly char[] SPECIAL_CHARACTERS = { '\a', '\b', '\n', '\r', '\f', '\t', '\v' };
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public Stage(Game game)
-		{
-			_inst = this;
-			Stage.game = game;
+        /// <summary>
+        /// 
+        /// </summary>
+        public Stage(Game game, IInputHandler handler)
+        {
+            _inst = this;
+            _wic = handler;
+            Stage.game = game;
 
-#if Windows
-			handler = new IMEHandler(game);
-			handler.onResultReceived += Handler_onResultReceived;
-#elif DesktopGL
-			game.Window.TextInput += WindowOnTextInput;
-#endif
-			soundVolume = 1;
+            if (handler == null)
+                game.Window.TextInput += WindowOnTextInput;
+
+            soundVolume = 1;
 
 			_batch = new FairyBatch();
 			_soundEnabled = true;
@@ -105,40 +100,14 @@ namespace FairyGUI
 			_focusRemovedDelegate = OnFocusRemoved;
 		}
 
-#if DesktopGL
 		private void WindowOnTextInput(object sender, TextInputEventArgs e)
-		{
-			if (e.Character == '\b' || e.Character == '\r')
-				return;
+        {
+            if (!SPECIAL_CHARACTERS.Contains(e.Character))
+            {
+                IMEAdapter.compositionString += e.Character;
+            }
 
-			IMEAdapter.compositionString += e.Character;
-		}
-#endif
-
-#if Windows
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void Handler_onResultReceived(object sender, IMEResultEventArgs e)
-		{
-			if (IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
-				return;
-
-			var content = IMEAdapter.compositionString;
-			switch ((int)e.result)
-			{
-				case 27:
-				case 13:
-					IMEAdapter.compositionString = "";
-					break;
-				default:
-					IMEAdapter.compositionString += e.result;
-					break;
-			}
-		}
-#endif
+        }
 
 
 		/// <summary>
@@ -477,7 +446,8 @@ namespace FairyGUI
 			for (int i = 0; i < cnt; i++)
 			{
 				Keys key = keys[i];
-				switch (key)
+
+                switch (key)
 				{
 					case Keys.LeftShift:
 						modifiers |= InputModifierFlags.LShift;
@@ -708,9 +678,10 @@ namespace FairyGUI
 			Timers.inst.Update(gameTime);
 			TweenManager.Update(gameTime);
 
-			HandleKeyEvents();
+            HandleInputCapturer();
+            HandleKeyEvents();
 			HandleMouseEvents();
-			if (_focused is InputTextField)
+            if (_focused is InputTextField)
 				HandleTextInput();
 
 			_tempDelegate = beforeUpdate;
@@ -733,7 +704,20 @@ namespace FairyGUI
 			afterUpdate = null;
 		}
 
-		/// <summary>
+        public void HandleInputCapturer()
+        {
+            var getChars = _wic.myCharacters;
+            foreach (var character in getChars)
+            {
+                if (!character.IsUsed && character.CharacterType == 0)
+                {
+                    IMEAdapter.compositionString += character.Chars;
+                    character.IsUsed = true;
+                }
+            }
+        }
+
+        /// <summary>
 		/// 
 		/// </summary>
 		/// <param name="gameTime"></param>

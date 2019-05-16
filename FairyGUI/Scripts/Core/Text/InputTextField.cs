@@ -2,15 +2,12 @@
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using HtmlElement = FairyGUI.Utils.HtmlElement;
 using Keys = Microsoft.Xna.Framework.Input.Keys;
 using Rectangle = System.Drawing.RectangleF;
-
-#if Windows
-using System.Windows.Forms;
-#endif
 
 namespace FairyGUI
 {
@@ -34,9 +31,10 @@ namespace FairyGUI
 		/// </summary>
 		public bool hideInput { get; set; }
 
-#if DesktopGL
+        /// <summary>
+        /// 
+        /// </summary>
 		public object CopyObject { get; set; }
-#endif
 
 		string _text;
 		string _restrict;
@@ -385,8 +383,13 @@ namespace FairyGUI
 				_composing = IMEAdapter.compositionString.Length;
 
 				string newText = buffer.ToString();
-				textField.text = newText;
-			}
+
+                if (textField.text != newText)
+                {
+                    IMEAdapter.candidataString = string.Empty;
+                    textField.text = newText;
+                }
+            }
 			else
 			{
 				if (_caretPosition == _text.Length)
@@ -842,6 +845,12 @@ namespace FairyGUI
 			{
 				case Keys.Back:
 					{
+                        if (IMEAdapter.candidataString.Length > 0)
+                        {
+                            IMEAdapter.candidataString = IMEAdapter.candidataString.Remove(IMEAdapter.candidataString.Length - 1, 1);
+                            break;
+                        }
+
 						if (textField.text.Length > 0)
 							IMEAdapter.compositionString = textField.text.Remove(textField.text.Length - 1, 1);
 
@@ -1032,7 +1041,11 @@ namespace FairyGUI
 				return;
 
 			string str = evt.KeyName;
-			if (!string.IsNullOrEmpty(str) && IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
+
+            if (str != null)
+                IMEAdapter.candidataString += str;
+
+            if (!string.IsNullOrEmpty(str) && IMEAdapter.compositionMode == IMEAdapter.CompositionMode.Off)
 			{ 
 				if (textField.singleLine && str == "\n")
 					return;
@@ -1041,8 +1054,10 @@ namespace FairyGUI
 			}
 			else
 			{
-				if (IMEAdapter.compositionString.Length > 0)
-					UpdateText();
+                if (IMEAdapter.compositionString.Length > 0)
+                {
+                    UpdateText();
+                }
 			}
 		}
 
