@@ -706,6 +706,9 @@ namespace FairyGUI
 
         public void HandleInputCapturer()
         {
+            if (_wic == null)
+                return;
+
             var getChars = _wic.myCharacters;
             foreach (var character in getChars)
             {
