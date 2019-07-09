@@ -1530,6 +1530,13 @@ namespace FairyGUI
 			RemoveFromParent();
 			RemoveEventListeners();
 			relations.Dispose();
+			relations = null;
+			for (int i = 0; i < 8; i++)
+			{
+				GearBase gear = _gears[i];
+				if (gear != null)
+					gear.Dispose();
+			}
 			if (displayObject != null)
 			{
 				displayObject.gOwner = null;

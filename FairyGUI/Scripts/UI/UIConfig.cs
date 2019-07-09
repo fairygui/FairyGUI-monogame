@@ -150,5 +150,10 @@ namespace FairyGUI
 		/// if RenderTexture using in paiting mode has depth support.
 		/// </summary>
 		public static bool depthSupportForPaintingMode = false;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static VertAlignType richTextRowVerticalAlign = VertAlignType.Bottom;
 	}
 }

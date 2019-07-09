@@ -29,7 +29,7 @@ namespace FairyGUI
 
 		NTexture _texture;
 		IMeshFactory _meshFactory;
-		
+
 		Color _color;
 		bool _meshDirty;
 		Rectangle _contentRect;

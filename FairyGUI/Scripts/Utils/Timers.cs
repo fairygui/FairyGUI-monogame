@@ -13,6 +13,8 @@ namespace FairyGUI
 	/// </summary>
 	public class Timers
 	{
+		public static bool catchCallbackExceptions = false;
+
 		Dictionary<TimerCallback, Anymous_T> _items;
 		Dictionary<TimerCallback, Anymous_T> _toAdd;
 		List<Anymous_T> _toRemove;
@@ -189,16 +191,20 @@ namespace FairyGUI
 					}
 					if (i.callback != null)
 					{
-						try
+						if (catchCallbackExceptions)
 						{
+							try
+							{
+								i.callback(i.param);
+							}
+							catch (System.Exception e)
+							{
+								i.deleted = true;
+								Log.Warning("FairyGUI: timer(internal=" + i.interval + ", repeat=" + i.repeat + ") callback error > " + e.Message);
+							}
+						}
+						else
 							i.callback(i.param);
-						}
-						catch (System.Exception e)
-						{
-							i.deleted = true;
-							Log.Info("timer callback failed, " + i.interval + "," + i.repeat);
-							Log.Exception(e);
-						}
 					}
 				}
 				iter.Dispose();

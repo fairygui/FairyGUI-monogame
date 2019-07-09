@@ -36,8 +36,6 @@ namespace FairyGUI
 		GObject _errorSign;
 		GComponent _content2;
 
-		static GObjectPool errorSignPool;
-
 		public GLoader()
 		{
 			_url = string.Empty;
@@ -413,6 +411,8 @@ namespace FairyGUI
 						this.SetSize(_contentItem.width, _contentItem.height);
 
 					SetErrorState();
+
+					Log.Warning("Unsupported type of GLoader: " + _contentItem.type);
 				}
 			}
 			else
@@ -460,10 +460,7 @@ namespace FairyGUI
 			{
 				if (UIConfig.loaderErrorSign != null)
 				{
-					if (errorSignPool == null)
-						errorSignPool = new GObjectPool();
-
-					_errorSign = errorSignPool.GetObject(UIConfig.loaderErrorSign);
+					_errorSign = UIPackage.CreateObjectFromURL(UIConfig.loaderErrorSign);
 				}
 				else
 					return;
@@ -478,12 +475,8 @@ namespace FairyGUI
 
 		private void ClearErrorState()
 		{
-			if (_errorSign != null)
-			{
+			if (_errorSign != null && _errorSign.displayObject.parent != null)
 				((Container)displayObject).RemoveChild(_errorSign.displayObject);
-				errorSignPool.ReturnObject(_errorSign);
-				_errorSign = null;
-			}
 		}
 
 		private void UpdateLayout()
@@ -598,10 +591,12 @@ namespace FairyGUI
 		{
 			ClearErrorState();
 
-			if (_contentItem == null && _content.texture != null)
-				FreeExternal(image.texture);
-
-			_content.texture = null;
+			if (_content.texture != null)
+			{
+				if (_contentItem == null)
+					FreeExternal(image.texture);
+				_content.texture = null;
+			}
 			_content.frames = null;
 
 			if (_content2 != null)

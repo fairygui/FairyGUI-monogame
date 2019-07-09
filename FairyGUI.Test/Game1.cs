@@ -1,9 +1,11 @@
 ﻿using FairyGUI;
-using FairyGUI.Scripts.Core.Text;
 using FairyGUI.Test.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+#if WINDOWS
+using FairyGUI.Scripts.Core.Text;
+#endif
 
 namespace FairyGUI.Test
 {
@@ -30,7 +32,11 @@ namespace FairyGUI.Test
 
 			IsMouseVisible = true;
 
+#if WINDOWS
 			this.Components.Add(new Stage(this, new WindowInputCapturer(this.Window.Handle, this)));
+#else
+			this.Components.Add(new Stage(this, null));
+#endif
 		}
 
 		/// <summary>
@@ -55,10 +61,10 @@ namespace FairyGUI.Test
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
-		    UIConfig.defaultFont = "Microsoft YaHei";
-		    GRoot.inst.AddChild(new MenuScene());
-            // TODO: use this.Content to load your game content here
-        }
+			UIConfig.defaultFont = "Microsoft YaHei";
+			GRoot.inst.AddChild(new MenuScene());
+			// TODO: use this.Content to load your game content here
+		}
 
 		/// <summary>
 		/// UnloadContent will be called once per game and is the place to unload

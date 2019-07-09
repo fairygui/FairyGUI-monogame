@@ -127,7 +127,7 @@ namespace FairyGUI
 				switch (_titleType)
 				{
 					case ProgressTitleType.Percent:
-						_titleObject.text =(int)Math.Round(percent * 100) + "%";
+						_titleObject.text = (int)Math.Round(percent * 100) + "%";
 						break;
 
 					case ProgressTitleType.ValueAndMax:

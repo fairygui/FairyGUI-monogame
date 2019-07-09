@@ -44,8 +44,9 @@ namespace FairyGUI
 		int _yOffset;
 		float _fontSizeScale;
 		float _globalScale;
-        Bitmap _canvas;
-        NTexture _texture;
+		Bitmap _canvas;
+		NTexture _texture;
+		VertAlignType lineVAlign = UIConfig.richTextRowVerticalAlign;
 
 		RichTextField _richTextField;
 
@@ -84,11 +85,11 @@ namespace FairyGUI
 		{
 			base.Dispose();
 
-            if (_canvas != null)
+			if (_canvas != null)
 				_canvas.Dispose();
-        }
+		}
 
-        internal void EnableRichSupport(RichTextField richTextField)
+		internal void EnableRichSupport(RichTextField richTextField)
 		{
 			_richTextField = richTextField;
 			if (_richTextField is InputTextField)
@@ -753,7 +754,8 @@ namespace FairyGUI
 								wordChars = 0;
 								wordPossible = true;
 							}
-							else if (wordPossible && (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z'))
+							else if (wordPossible && (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' ||
+													  ch >= '0' && ch <= '9' || ch == '.' || ch == '"' || ch == '\''))
 							{
 								if (wordChars == 0)
 									wordStart = line.width;
@@ -871,7 +873,7 @@ namespace FairyGUI
 					_richTextField.SetSize(_textWidth, _textHeight);
 				else
 					SetSize(_textWidth, _textHeight);
-                _updatingSize = false;
+				_updatingSize = false;
 			}
 			else if (_autoSize == AutoSizeType.Height)
 			{
@@ -939,7 +941,7 @@ namespace FairyGUI
 				return;
 			}
 
-            if (_font is DynamicFont)
+			if (_font is DynamicFont)
 				BuildMesh_systemFont(vb);
 			else
 				BuildMesh_bitmapFont(vb);
@@ -1073,7 +1075,14 @@ namespace FairyGUI
 						IHtmlObject htmlObj = element.htmlObject;
 						if (htmlObj != null)
 						{
-							element.position = new Vector2(charX + 1, line.y + (int)((line.height - htmlObj.height) / 2));
+							if (lineVAlign == VertAlignType.Bottom)
+								yIndent = (int)(line.height - htmlObj.height);
+							else if (lineVAlign == VertAlignType.Middle)
+								yIndent = (int)((line.height - htmlObj.height) / 2);
+							else
+								yIndent = 0;
+
+							element.position = new Vector2(charX + 1, line.y + yIndent);
 							htmlObj.SetPosition(element.position.X, element.position.Y);
 							if (lineClipped || clipped && (element.position.X < GUTTER_X || element.position.X + htmlObj.width > _contentRect.Width - GUTTER_X))
 								element.status |= 1;
@@ -1331,7 +1340,12 @@ namespace FairyGUI
 								continue;
 							}
 
-							yIndent = (int)((line.height + line.textHeight) / 2 - glyph.height);
+							if (lineVAlign == VertAlignType.Bottom)
+								yIndent = (int)(line.height - glyph.height);
+							else if (lineVAlign == VertAlignType.Middle)
+								yIndent = (int)((line.height + line.textHeight) / 2 - glyph.height);
+							else
+								yIndent = (int)(line.textHeight - glyph.height);
 							if (format.specialStyle == TextFormat.SpecialStyle.Subscript)
 								yIndent += (int)(glyph.height * 0.333f);
 							else if (format.specialStyle == TextFormat.SpecialStyle.Superscript)

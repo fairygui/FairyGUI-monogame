@@ -174,12 +174,12 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="repeat"></param>
+		/// <param name="times"></param>
 		/// <param name="yoyo"></param>
 		/// <returns></returns>
-		public GTweener SetRepeat(int repeat, bool yoyo = false)
+		public GTweener SetRepeat(int times, bool yoyo = false)
 		{
-			_repeat = repeat;
+			_repeat = times;
 			_yoyo = yoyo;
 			return this;
 		}
@@ -475,8 +475,8 @@ namespace FairyGUI
 			_valueSize = 1;
 			_startValue.x = start;
 			_endValue.x = end;
-            _value.x = start;
-            _duration = duration;
+			_value.x = start;
+			_duration = duration;
 			return this;
 		}
 
@@ -485,8 +485,8 @@ namespace FairyGUI
 			_valueSize = 2;
 			_startValue.vec2 = start;
 			_endValue.vec2 = end;
-            _value.vec2 = start;
-            _duration = duration;
+			_value.vec2 = start;
+			_duration = duration;
 			return this;
 		}
 
@@ -495,8 +495,8 @@ namespace FairyGUI
 			_valueSize = 3;
 			_startValue.vec3 = start;
 			_endValue.vec3 = end;
-            _value.vec3 = start;
-            _duration = duration;
+			_value.vec3 = start;
+			_duration = duration;
 			return this;
 		}
 
@@ -505,8 +505,8 @@ namespace FairyGUI
 			_valueSize = 4;
 			_startValue.vec4 = start;
 			_endValue.vec4 = end;
-            _value.vec4 = start;
-            _duration = duration;
+			_value.vec4 = start;
+			_duration = duration;
 			return this;
 		}
 
@@ -515,8 +515,8 @@ namespace FairyGUI
 			_valueSize = 4;
 			_startValue.color = start;
 			_endValue.color = end;
-            _value.color = start;
-            _duration = duration;
+			_value.color = start;
+			_duration = duration;
 			return this;
 		}
 
@@ -525,8 +525,8 @@ namespace FairyGUI
 			_valueSize = 5;
 			_startValue.d = start;
 			_endValue.d = end;
-            _value.d = start;
-            _duration = duration;
+			_value.d = start;
+			_duration = duration;
 			return this;
 		}
 
@@ -572,6 +572,12 @@ namespace FairyGUI
 
 		internal void _Update(GameTime gameTime)
 		{
+			if ((_target is GObject) && ((GObject)_target)._disposed)
+			{
+				_killed = true;
+				return;
+			}
+
 			if (_ended != 0) //Maybe completed by seek
 			{
 				CallCompleteCallback();

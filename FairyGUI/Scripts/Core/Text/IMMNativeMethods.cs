@@ -95,7 +95,7 @@ namespace FairyGUI.Scripts.Core.Text
 
 		public const int InputLanguageChange = 0x0051;
 		#endregion
-		
+
 		[DllImport("imm32.dll", SetLastError = true)]
 		public static extern IntPtr ImmAssociateContext(IntPtr hWnd, IntPtr hIMC);
 
@@ -153,10 +153,10 @@ namespace FairyGUI.Scripts.Core.Text
 		}
 	}
 
-    public static class WindowMessage
-    {
-        public const int ImeSetContext = 0x0281;
-        public const int InputLanguageChange = 0x0051;
-    }
+	public static class WindowMessage
+	{
+		public const int ImeSetContext = 0x0281;
+		public const int InputLanguageChange = 0x0051;
+	}
 }
 #endif

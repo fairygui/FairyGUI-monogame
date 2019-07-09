@@ -26,12 +26,12 @@ namespace FairyGUI
 		/// </summary>
 		public bool touchChildren;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool reversedMask;
+		/// <summary>
+		/// 
+		/// </summary>
+		public bool reversedMask;
 
-        List<DisplayObject> _children;
+		List<DisplayObject> _children;
 		DisplayObject _mask;
 		Rectangle? _clipRect;
 
@@ -363,21 +363,21 @@ namespace FairyGUI
 			return rect;
 		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="stagePoint"></param>
-        /// <param name="forTouch"></param>
-        /// <param name="displayIndex"></param>
-        /// <returns></returns>
-        public DisplayObject HitTest(Vector2 stagePoint, bool forTouch, int displayIndex = -1)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="stagePoint"></param>
+		/// <param name="forTouch"></param>
+		/// <param name="displayIndex"></param>
+		/// <returns></returns>
+		public DisplayObject HitTest(Vector2 stagePoint, bool forTouch, int displayIndex = -1)
 		{
 			HitTestContext.screenPoint = stagePoint;
 			HitTestContext.forTouch = forTouch;
 			HitTestContext.raycastDone = false;
-            HitTestContext.displayIndex = displayIndex;
+			HitTestContext.displayIndex = displayIndex;
 
-            DisplayObject ret = HitTest();
+			DisplayObject ret = HitTest();
 			if (ret != null)
 				return ret;
 			else if (this is Stage)
@@ -405,14 +405,14 @@ namespace FairyGUI
 					return null;
 			}
 
-            if (_mask != null && _mask.parent == this)
-            {
-                DisplayObject tmp = _mask.InternalHitTestMask();
-                if (!reversedMask && tmp == null || reversedMask && tmp != null)
-                    return null;
-            }
+			if (_mask != null && _mask.parent == this)
+			{
+				DisplayObject tmp = _mask.InternalHitTestMask();
+				if (!reversedMask && tmp == null || reversedMask && tmp != null)
+					return null;
+			}
 
-            DisplayObject target = null;
+			DisplayObject target = null;
 			if (touchChildren)
 			{
 				int count = _children.Count;

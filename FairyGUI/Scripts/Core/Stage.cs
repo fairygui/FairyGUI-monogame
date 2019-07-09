@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -69,23 +68,23 @@ namespace FairyGUI
 			get { return false; }
 		}
 
-        public IInputHandler _wic { get; set; }
+		public IInputHandler _wic { get; set; }
 
-        public static readonly char[] SPECIAL_CHARACTERS = { '\a', '\b', '\n', '\r', '\f', '\t', '\v' };
+		public static readonly char[] SPECIAL_CHARACTERS = { '\a', '\b', '\n', '\r', '\f', '\t', '\v' };
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Stage(Game game, IInputHandler handler)
-        {
-            _inst = this;
-            _wic = handler;
-            Stage.game = game;
+		/// <summary>
+		/// 
+		/// </summary>
+		public Stage(Game game, IInputHandler handler)
+		{
+			_inst = this;
+			_wic = handler;
+			Stage.game = game;
 
-            if (handler == null)
-                game.Window.TextInput += WindowOnTextInput;
+			if (handler == null)
+				game.Window.TextInput += WindowOnTextInput;
 
-            soundVolume = 1;
+			soundVolume = 1;
 
 			_batch = new FairyBatch();
 			_soundEnabled = true;
@@ -101,13 +100,13 @@ namespace FairyGUI
 		}
 
 		private void WindowOnTextInput(object sender, TextInputEventArgs e)
-        {
-            if (!SPECIAL_CHARACTERS.Contains(e.Character))
-            {
-                IMEAdapter.compositionString += e.Character;
-            }
+		{
+			if (!SPECIAL_CHARACTERS.Contains(e.Character))
+			{
+				IMEAdapter.compositionString += e.Character;
+			}
 
-        }
+		}
 
 
 		/// <summary>
@@ -447,7 +446,7 @@ namespace FairyGUI
 			{
 				Keys key = keys[i];
 
-                switch (key)
+				switch (key)
 				{
 					case Keys.LeftShift:
 						modifiers |= InputModifierFlags.LShift;
@@ -678,10 +677,10 @@ namespace FairyGUI
 			Timers.inst.Update(gameTime);
 			TweenManager.Update(gameTime);
 
-            HandleInputCapturer();
-            HandleKeyEvents();
+			HandleInputCapturer();
+			HandleKeyEvents();
 			HandleMouseEvents();
-            if (_focused is InputTextField)
+			if (_focused is InputTextField)
 				HandleTextInput();
 
 			_tempDelegate = beforeUpdate;
@@ -704,23 +703,23 @@ namespace FairyGUI
 			afterUpdate = null;
 		}
 
-        public void HandleInputCapturer()
-        {
-            if (_wic == null)
-                return;
+		public void HandleInputCapturer()
+		{
+			if (_wic == null)
+				return;
 
-            var getChars = _wic.myCharacters;
-            foreach (var character in getChars)
-            {
-                if (!character.IsUsed && character.CharacterType == 0)
-                {
-                    IMEAdapter.compositionString += character.Chars;
-                    character.IsUsed = true;
-                }
-            }
-        }
+			var getChars = _wic.myCharacters;
+			foreach (var character in getChars)
+			{
+				if (!character.IsUsed && character.CharacterType == 0)
+				{
+					IMEAdapter.compositionString += character.Chars;
+					character.IsUsed = true;
+				}
+			}
+		}
 
-        /// <summary>
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="gameTime"></param>
@@ -887,27 +886,27 @@ namespace FairyGUI
 
 		public DisplayObject ClickTest()
 		{
-            if (downTargets.Count == 0
-                || clickCancelled
-                || Math.Abs(x - downX) > 50 || Math.Abs(y - downY) > 50)
-            {
-                downTargets.Clear();
-                return null;
-            }
+			if (downTargets.Count == 0
+				|| clickCancelled
+				|| Math.Abs(x - downX) > 50 || Math.Abs(y - downY) > 50)
+			{
+				downTargets.Clear();
+				return null;
+			}
 
 			DisplayObject obj = downTargets[0];
-            if (obj.stage != null) //依然派发到原来的downTarget，虽然可能它已经偏离当前位置，主要是为了正确处理点击缩放的效果
-            {
-                downTargets.Clear();
-                return obj;
-            }
+			if (obj.stage != null) //依然派发到原来的downTarget，虽然可能它已经偏离当前位置，主要是为了正确处理点击缩放的效果
+			{
+				downTargets.Clear();
+				return obj;
+			}
 
 			obj = target;
 			while (obj != null)
 			{
 				int i = downTargets.IndexOf(obj);
-                if (i != -1 && obj.stage != null)
-                    break;
+				if (i != -1 && obj.stage != null)
+					break;
 
 				obj = obj.parent;
 			}

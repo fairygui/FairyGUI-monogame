@@ -2287,7 +2287,7 @@ namespace FairyGUI
 					return vector2.Y;
 
 				default:
-					throw new ArgumentOutOfRangeException(nameof(index), "Indices must run from 0 to 1!");
+					throw new ArgumentOutOfRangeException("index", "Indices must run from 0 to 1!");
 			}
 		}
 
@@ -2303,7 +2303,7 @@ namespace FairyGUI
 					break;
 
 				default:
-					throw new ArgumentOutOfRangeException(nameof(index), "Indices must run from 0 to 1!");
+					throw new ArgumentOutOfRangeException("index", "Indices must run from 0 to 1!");
 			}
 
 			return vector2;
