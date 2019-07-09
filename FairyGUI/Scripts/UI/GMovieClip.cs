@@ -1,9 +1,6 @@
 ﻿using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
-
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {

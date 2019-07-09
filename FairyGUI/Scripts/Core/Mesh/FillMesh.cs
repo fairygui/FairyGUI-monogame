@@ -1,8 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {
@@ -88,65 +86,70 @@ namespace FairyGUI
 		//4 vertex
 		static void FillRadial90(VertexBuffer vb, Rectangle vertRect, Origin90 origin, float amount, bool clockwise)
 		{
-			bool flipX = origin == Origin90.TopRight || origin == Origin90.BottomRight;
-			bool flipY = origin == Origin90.BottomLeft || origin == Origin90.BottomRight;
-			if (flipX != flipY)
-				clockwise = !clockwise;
+            bool flipX = origin == Origin90.TopRight || origin == Origin90.BottomRight;
+            bool flipY = origin == Origin90.BottomLeft || origin == Origin90.BottomRight;
+            if (flipX != flipY)
+                clockwise = !clockwise;
 
-			float ratio = clockwise ? amount : (1 - amount);
-			float tan = (float)Math.Tan(Math.PI * 0.5f * ratio);
-			float x = vertRect.X + (ratio == 0 ? float.MaxValue : (vertRect.Height / tan));
-			float y = vertRect.Y + (ratio == 1 ? float.MaxValue : (vertRect.Width * tan));
-			float x2 = x;
-			float y2 = y;
-			if (flipX)
-				x2 = vertRect.Width - x;
-			if (flipY)
-				y2 = vertRect.Height - y;
-			float xMin = flipX ? (vertRect.Width - vertRect.X) : vertRect.X;
-			float yMin = flipY ? (vertRect.Height - vertRect.Y) : vertRect.Y;
-			float xMax = flipX ? -vertRect.X : vertRect.Right;
-			float yMax = flipY ? -vertRect.Y : vertRect.Bottom;
+            float ratio = clockwise ? amount : (1 - amount);
+            float tan = (float)Math.Tan(Math.PI * 0.5f * ratio);
+            bool thresold = false;
+            if (ratio != 1)
+                thresold = (vertRect.Height / vertRect.Width - tan) > 0;
+            if (!clockwise)
+                thresold = !thresold;
+            float x = vertRect.X + (ratio == 0 ? float.MaxValue : (vertRect.Height / tan));
+            float y = vertRect.Y + (ratio == 1 ? float.MaxValue : (vertRect.Width * tan));
+            float x2 = x;
+            float y2 = y;
+            if (flipX)
+                x2 = vertRect.Width - x;
+            if (flipY)
+                y2 = vertRect.Height - y;
+            float xMin = flipX ? (vertRect.Width - vertRect.X) : vertRect.X;
+            float yMin = flipY ? (vertRect.Height - vertRect.Y) : vertRect.Y;
+            float xMax = flipX ? -vertRect.X : vertRect.Right;
+            float yMax = flipY ? -vertRect.Y : vertRect.Bottom;
 
-			vb.AddVert(new Vector3(xMin, yMin, 0));
+            vb.AddVert(new Vector3(xMin, yMin, 0));
 
-			if (clockwise)
-				vb.AddVert(new Vector3(xMax, yMin, 0));
+            if (clockwise)
+                vb.AddVert(new Vector3(xMax, yMin, 0));
 
-			if (y > vertRect.Bottom)
-			{
-				if (amount < 0.5f)
-					vb.AddVert(new Vector3(x2, yMax, 0));
-				else
-					vb.AddVert(new Vector3(xMax, yMax, 0));
-			}
-			else
-				vb.AddVert(new Vector3(xMax, y2, 0));
+            if (y > vertRect.Bottom)
+            {
+                if (thresold)
+                    vb.AddVert(new Vector3(x2, yMax, 0));
+                else
+                    vb.AddVert(new Vector3(xMax, yMax, 0));
+            }
+            else
+                vb.AddVert(new Vector3(xMax, y2, 0));
 
-			if (x > vertRect.Right)
-			{
-				if (amount < 0.5f)
-					vb.AddVert(new Vector3(xMax, y2, 0));
-				else
-					vb.AddVert(new Vector3(xMax, yMax, 0));
-			}
-			else
-				vb.AddVert(new Vector3(x2, yMax, 0));
+            if (x > vertRect.Right)
+            {
+                if (thresold)
+                    vb.AddVert(new Vector3(xMax, y2, 0));
+                else
+                    vb.AddVert(new Vector3(xMax, yMax, 0));
+            }
+            else
+                vb.AddVert(new Vector3(x2, yMax, 0));
 
-			if (!clockwise)
-				vb.AddVert(new Vector3(xMin, yMax, 0));
+            if (!clockwise)
+                vb.AddVert(new Vector3(xMin, yMax, 0));
 
-			if (flipX == flipY)
-			{
-				vb.AddTriangle(0, 1, 2);
-				vb.AddTriangle(0, 2, 3);
-			}
-			else
-			{
-				vb.AddTriangle(2, 1, 0);
-				vb.AddTriangle(3, 2, 0);
-			}
-		}
+            if (flipX == flipY)
+            {
+                vb.AddTriangle(0, 1, 2);
+                vb.AddTriangle(0, 2, 3);
+            }
+            else
+            {
+                vb.AddTriangle(2, 1, 0);
+                vb.AddTriangle(3, 2, 0);
+            }
+        }
 
 		//8 vertex
 		static void FillRadial180(VertexBuffer vb, Rectangle vertRect, Origin180 origin, float amount, bool clockwise)

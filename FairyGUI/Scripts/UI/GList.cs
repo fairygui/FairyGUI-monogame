@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
-
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {
@@ -1934,8 +1931,8 @@ namespace FairyGUI
 			if (deltaSize != 0 || firstItemDeltaSize != 0)
 				this.scrollPane.ChangeContentSizeOnScrolling(0, deltaSize, 0, firstItemDeltaSize);
 
-			if (curIndex > 0 && this.numChildren > 0 && this.container.y < 0 && GetChildAt(0).y > -this.container.y)//最后一页没填满！
-				return true;
+            if (curIndex > 0 && this.numChildren > 0 && this.container.y <= 0 && GetChildAt(0).y > -this.container.y)//最后一页没填满！
+                return true;
 			else
 				return false;
 		}
@@ -2103,8 +2100,8 @@ namespace FairyGUI
 			if (deltaSize != 0 || firstItemDeltaSize != 0)
 				this.scrollPane.ChangeContentSizeOnScrolling(deltaSize, 0, firstItemDeltaSize, 0);
 
-			if (curIndex > 0 && this.numChildren > 0 && this.container.x < 0 && GetChildAt(0).x > -this.container.x)//最后一页没填满！
-				return true;
+            if (curIndex > 0 && this.numChildren > 0 && this.container.x <= 0 && GetChildAt(0).x > -this.container.x)//最后一页没填满！
+                return true;
 			else
 				return false;
 		}
@@ -2459,9 +2456,10 @@ namespace FairyGUI
 				{
 					float lineSize = 0;
 					int lineStart = 0;
-					float ratio;
+                    float remainSize;
+                    float remainPercent;
 
-					for (i = 0; i < cnt; i++)
+                    for (i = 0; i < cnt; i++)
 					{
 						child = GetChildAt(i);
 						if (foldInvisibleItems && !child.visible)
@@ -2471,7 +2469,8 @@ namespace FairyGUI
 						j++;
 						if (j == _columnCount || i == cnt - 1)
 						{
-							ratio = (viewWidth - lineSize - (j - 1) * _columnGap) / lineSize;
+							remainSize = viewWidth - (j - 1) * _columnGap;
+							remainPercent = 1;
 							curX = 0;
 							for (j = lineStart; j <= i; j++)
 							{
@@ -2480,16 +2479,12 @@ namespace FairyGUI
 									continue;
 
 								child.SetPosition(curX, curY);
+                                float perc = child.sourceWidth / lineSize;
+                                child.SetSize((float)Math.Round(perc / remainPercent * remainSize), child.height, true);
+                                remainSize -= child.width;
+                                remainPercent -= perc;
+                                curX += child.width + _columnGap;
 
-								if (j < i)
-								{
-									child.SetSize(child.sourceWidth + (float)Math.Round(child.sourceWidth * ratio), child.height, true);
-									curX += (int)Math.Ceiling(child.width) + _columnGap;
-								}
-								else
-								{
-									child.SetSize(viewWidth - curX, child.height, true);
-								}
 								if (child.height > maxHeight)
 									maxHeight = child.height;
 							}
@@ -2542,9 +2537,10 @@ namespace FairyGUI
 				{
 					float lineSize = 0;
 					int lineStart = 0;
-					float ratio;
+                    float remainSize;
+                    float remainPercent;
 
-					for (i = 0; i < cnt; i++)
+                    for (i = 0; i < cnt; i++)
 					{
 						child = GetChildAt(i);
 						if (foldInvisibleItems && !child.visible)
@@ -2554,8 +2550,9 @@ namespace FairyGUI
 						j++;
 						if (j == _lineCount || i == cnt - 1)
 						{
-							ratio = (viewHeight - lineSize - (j - 1) * _lineGap) / lineSize;
-							curY = 0;
+                            remainSize = viewHeight - (j - 1) * _lineGap;
+                            remainPercent = 1;
+                            curY = 0;
 							for (j = lineStart; j <= i; j++)
 							{
 								child = GetChildAt(j);
@@ -2564,15 +2561,12 @@ namespace FairyGUI
 
 								child.SetPosition(curX, curY);
 
-								if (j < i)
-								{
-									child.SetSize(child.width, child.sourceHeight + (float)Math.Round(child.sourceHeight * ratio), true);
-									curY += (int)Math.Ceiling(child.height) + _lineGap;
-								}
-								else
-								{
-									child.SetSize(child.width, viewHeight - curY, true);
-								}
+                                float perc = child.sourceHeight / lineSize;
+                                child.SetSize(child.width, (float)Math.Round(perc / remainPercent * remainSize), true);
+                                remainSize -= child.height;
+                                remainPercent -= perc;
+                                curY += child.height + _lineGap;
+
 								if (child.width > maxWidth)
 									maxWidth = child.width;
 							}
@@ -2630,9 +2624,10 @@ namespace FairyGUI
 				{
 					float lineSize = 0;
 					int lineStart = 0;
-					float ratio;
+                    float remainSize;
+                    float remainPercent;
 
-					for (i = 0; i < cnt; i++)
+                    for (i = 0; i < cnt; i++)
 					{
 						child = GetChildAt(i);
 						if (foldInvisibleItems && !child.visible)
@@ -2651,8 +2646,9 @@ namespace FairyGUI
 						j++;
 						if (j == _columnCount || i == cnt - 1)
 						{
-							ratio = (viewWidth - lineSize - (j - 1) * _columnGap) / lineSize;
-							curX = 0;
+                            remainSize = viewWidth - (j - 1) * _columnGap;
+                            remainPercent = 1;
+                            curX = 0;
 							for (j = lineStart; j <= i; j++)
 							{
 								child = GetChildAt(j);
@@ -2661,16 +2657,12 @@ namespace FairyGUI
 
 								child.SetPosition(page * viewWidth + curX, curY);
 
-								if (j < i)
-								{
-									child.SetSize(child.sourceWidth + (float)Math.Round(child.sourceWidth * ratio),
-										_lineCount > 0 ? eachHeight : child.height, true);
-									curX += (int)Math.Ceiling(child.width) + _columnGap;
-								}
-								else
-								{
-									child.SetSize(viewWidth - curX, _lineCount > 0 ? eachHeight : child.height, true);
-								}
+                                float perc = child.sourceWidth / lineSize;
+                                child.SetSize((float)Math.Round(perc / remainPercent * remainSize), _lineCount > 0 ? eachHeight : child.height, true);
+                                remainSize -= child.width;
+                                remainPercent -= perc;
+                                curX += child.width + _columnGap;
+
 								if (child.height > maxHeight)
 									maxHeight = child.height;
 							}

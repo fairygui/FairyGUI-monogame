@@ -1,9 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {
@@ -102,15 +99,16 @@ namespace FairyGUI
 		/// <param name="fillColor"></param>
 		public void DrawEllipse(Color fillColor)
 		{
-			EllipseMesh mesh = graphics.GetMeshFactory<EllipseMesh>();
-			mesh.lineWidth = 0;
-			mesh.startDegree = 0;
-			mesh.endDegreee = 360;
-			mesh.fillColor = null;
+            EllipseMesh mesh = graphics.GetMeshFactory<EllipseMesh>();
+            mesh.lineWidth = 0;
+            mesh.startDegree = 0;
+            mesh.endDegreee = 360;
+            mesh.fillColor = null;
+            mesh.centerColor = null;
 
-			graphics.color = fillColor;
-			graphics.SetMeshDirty();
-		}
+            graphics.color = fillColor;
+            graphics.SetMeshDirty();
+        }
 
 		/// <summary>
 		/// 
@@ -123,17 +121,20 @@ namespace FairyGUI
 		/// <param name="endDegree"></param>
 		public void DrawEllipse(float lineSize, Color centerColor, Color lineColor, Color fillColor, float startDegree, float endDegree)
 		{
-			EllipseMesh mesh = graphics.GetMeshFactory<EllipseMesh>();
-			mesh.lineWidth = lineSize;
-			mesh.centerColor = centerColor;
-			mesh.lineColor = lineColor;
-			mesh.fillColor = null;
-			mesh.startDegree = startDegree;
-			mesh.endDegreee = endDegree;
+            EllipseMesh mesh = graphics.GetMeshFactory<EllipseMesh>();
+            mesh.lineWidth = lineSize;
+            if (centerColor.Equals(fillColor))
+                mesh.centerColor = null;
+            else
+                mesh.centerColor = centerColor;
+            mesh.lineColor = lineColor;
+            mesh.fillColor = null;
+            mesh.startDegree = startDegree;
+            mesh.endDegreee = endDegree;
 
-			graphics.color = fillColor;
-			graphics.SetMeshDirty();
-		}
+            graphics.color = fillColor;
+            graphics.SetMeshDirty();
+        }
 
 		/// <summary>
 		/// 

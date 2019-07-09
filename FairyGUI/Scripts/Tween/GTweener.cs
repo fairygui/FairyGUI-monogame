@@ -475,7 +475,8 @@ namespace FairyGUI
 			_valueSize = 1;
 			_startValue.x = start;
 			_endValue.x = end;
-			_duration = duration;
+            _value.x = start;
+            _duration = duration;
 			return this;
 		}
 
@@ -484,7 +485,8 @@ namespace FairyGUI
 			_valueSize = 2;
 			_startValue.vec2 = start;
 			_endValue.vec2 = end;
-			_duration = duration;
+            _value.vec2 = start;
+            _duration = duration;
 			return this;
 		}
 
@@ -493,7 +495,8 @@ namespace FairyGUI
 			_valueSize = 3;
 			_startValue.vec3 = start;
 			_endValue.vec3 = end;
-			_duration = duration;
+            _value.vec3 = start;
+            _duration = duration;
 			return this;
 		}
 
@@ -502,7 +505,8 @@ namespace FairyGUI
 			_valueSize = 4;
 			_startValue.vec4 = start;
 			_endValue.vec4 = end;
-			_duration = duration;
+            _value.vec4 = start;
+            _duration = duration;
 			return this;
 		}
 
@@ -511,7 +515,8 @@ namespace FairyGUI
 			_valueSize = 4;
 			_startValue.color = start;
 			_endValue.color = end;
-			_duration = duration;
+            _value.color = start;
+            _duration = duration;
 			return this;
 		}
 
@@ -520,7 +525,8 @@ namespace FairyGUI
 			_valueSize = 5;
 			_startValue.d = start;
 			_endValue.d = end;
-			_duration = duration;
+            _value.d = start;
+            _duration = duration;
 			return this;
 		}
 

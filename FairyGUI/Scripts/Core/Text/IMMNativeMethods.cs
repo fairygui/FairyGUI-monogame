@@ -152,5 +152,11 @@ namespace FairyGUI.Scripts.Core.Text
 			public uint[] dwOffset;
 		}
 	}
+
+    public static class WindowMessage
+    {
+        public const int ImeSetContext = 0x0281;
+        public const int InputLanguageChange = 0x0051;
+    }
 }
 #endif

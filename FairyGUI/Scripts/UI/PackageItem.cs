@@ -2,9 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {

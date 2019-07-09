@@ -82,10 +82,12 @@
     <Compile Include="Scripts\Core\Stats.cs" />
     <Compile Include="Scripts\Core\Text\BaseFont.cs" />
     <Compile Include="Scripts\Core\Text\BitmapFont.cs" />
+    <Compile Include="Scripts\Core\Text\Character.cs" />
     <Compile Include="Scripts\Core\Text\CharMessageFilter.cs" />
     <Compile Include="Scripts\Core\Text\DynamicFont.cs" />
     <Compile Include="Scripts\Core\Text\Emoji.cs" />
     <Compile Include="Scripts\Core\Text\FontManager.cs" />
+    <Compile Include="Scripts\Core\Text\IInputHandler.cs" />
     <Compile Include="Scripts\Core\Text\IME.cs" />
     <Compile Include="Scripts\Core\Text\IMEAdapter.cs" />
     <Compile Include="Scripts\Core\Text\IMENativeWindow.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Scripts\Core\Text\TextField.cs" />
     <Compile Include="Scripts\Core\Text\TextFormat.cs" />
     <Compile Include="Scripts\Core\FairyBatch.cs" />
+    <Compile Include="Scripts\Core\Text\WindowInputCapturer.cs" />
     <Compile Include="Scripts\Event\EventBridge.cs" />
     <Compile Include="Scripts\Event\EventContext.cs" />
     <Compile Include="Scripts\Event\EventDispatcher.cs" />

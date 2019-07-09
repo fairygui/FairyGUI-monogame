@@ -13,5 +13,6 @@ namespace FairyGUI
 		public static uint hitEntityId;
 		public static Vector2 hitUV;
 		public static bool forTouch;
-	}
+        public static int displayIndex;
+    }
 }

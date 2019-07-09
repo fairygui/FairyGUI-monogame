@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
-#if Windows || DesktopGL
 using System.Drawing;
-#endif
 
 namespace FairyGUI
 {
@@ -15,12 +12,12 @@ namespace FairyGUI
 		int _size;
 		FontStyle _style;
 
-		static Dictionary<int, Font> sFontCache = new Dictionary<int, Font>();
+        static Dictionary<int, Font> sFontCache = new Dictionary<int, Font>();
 
 		public DynamicFont(string name)
 		{
 			this.name = name;
-		}
+        }
 
 		override public void SetFormat(TextFormat format, float fontSizeScale)
 		{

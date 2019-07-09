@@ -46,12 +46,12 @@ namespace FairyGUI
 			set
 			{
 				_compositionMode = value;
-#if Windows
-				if (compositionMode == CompositionMode.On)
-					Stage.handler.Enabled = true;
-				else if (compositionMode == CompositionMode.Off)
-					Stage.handler.Enabled = false;
-#endif
+//#if Windows
+//				if (compositionMode == CompositionMode.On)
+//					Stage.handler.Enabled = true;
+//				else if (compositionMode == CompositionMode.Off)
+//					Stage.handler.Enabled = false;
+//#endif
 			}
 		}
 
@@ -62,6 +62,8 @@ namespace FairyGUI
 		{
 			get; set;
 		}
+
+        public static string candidataString { get; set; }
 
 
 		static IMEAdapter()

@@ -83,6 +83,7 @@
     <Compile Include="Scripts\Core\Text\DynamicFont.cs" />
     <Compile Include="Scripts\Core\Text\Emoji.cs" />
     <Compile Include="Scripts\Core\Text\FontManager.cs" />
+    <Compile Include="Scripts\Core\Text\IInputHandler.cs" />
     <Compile Include="Scripts\Core\Text\IMEAdapter.cs" />
     <Compile Include="Scripts\Core\Text\InputTextField.cs" />
     <Compile Include="Scripts\Core\Text\SelectionShape.cs" />

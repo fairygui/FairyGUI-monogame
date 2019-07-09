@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
-
-#if Windows || DesktopGL
 using Rectangle = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {
@@ -865,7 +862,11 @@ namespace FairyGUI
 		public DisplayObject mask
 		{
 			get { return container.mask; }
-			set { container.mask = value; }
+			set {
+                container.mask = value;
+                if (value != null && value.parent != container)
+                    container.AddChild(value);
+            }
 		}
 
 		/// <summary>
@@ -1361,9 +1362,10 @@ namespace FairyGUI
 			int maskId = buffer.ReadShort();
 			if (maskId != -1)
 			{
-				this.mask = GetChildAt(maskId).displayObject;
-				buffer.ReadBool(); //reversedMask
-			}
+                container.mask = GetChildAt(maskId).displayObject;
+                if (buffer.ReadBool())
+                    container.reversedMask = true;
+            }
 			string hitTestId = buffer.ReadS();
 			if (hitTestId != null)
 			{
@@ -1372,8 +1374,8 @@ namespace FairyGUI
 				{
 					int i1 = buffer.ReadInt();
 					int i2 = buffer.ReadInt();
-					this.rootContainer.hitArea = new PixelHitTest(pi.pixelHitTestData, i1, i2, sourceWidth, sourceHeight);
-				}
+                    rootContainer.hitArea = new PixelHitTest(pi.pixelHitTestData, i1, i2, sourceWidth, sourceHeight);
+                }
 			}
 
 			buffer.Seek(0, 5);

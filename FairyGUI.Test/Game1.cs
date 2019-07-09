@@ -1,4 +1,5 @@
 ﻿using FairyGUI;
+using FairyGUI.Scripts.Core.Text;
 using FairyGUI.Test.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -29,7 +30,7 @@ namespace FairyGUI.Test
 
 			IsMouseVisible = true;
 
-			this.Components.Add(new Stage(this));
+			this.Components.Add(new Stage(this, new WindowInputCapturer(this.Window.Handle, this)));
 		}
 
 		/// <summary>

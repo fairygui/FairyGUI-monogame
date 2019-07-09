@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using FairyGUI.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-#if Windows || DesktopGL
 using RectangleF = System.Drawing.RectangleF;
-#endif
 
 namespace FairyGUI
 {
@@ -114,7 +111,7 @@ namespace FairyGUI
 			_device.BlendState = BlendState.NonPremultiplied;
 			_device.DepthStencilState = DepthStencilState.None;
 			_device.RasterizerState = RasterizerState.CullNone;
-			_device.SamplerStates[0] = SamplerState.LinearClamp;
+			_device.SamplerStates[0] = SamplerState.PointClamp;
 
 			_spritePass.Apply();
 			_defaultPass.Apply();
